@@ -1,0 +1,1 @@
+- [Pyram Sterling Bank architecture](pyram-sterling-bank.md) — First user auto-becomes admin; Kanè auto-provisioned on registration with $1k balance.

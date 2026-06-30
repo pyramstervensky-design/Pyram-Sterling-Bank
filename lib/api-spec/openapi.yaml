@@ -3,20 +3,32 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Pyram Sterling Bank API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: users
+    description: User profile and account management
+  - name: kane
+    description: Bank Account Ledger (Kanè) operations
+  - name: transactions
+    description: Transaction operations
+  - name: loans
+    description: Loan management
+  - name: admin
+    description: Admin operations
+  - name: partners
+    description: Partner/business management
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +36,663 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── Users ──────────────────────────────────────────────────────────────────
+  /users/me:
+    get:
+      operationId: getMe
+      tags: [users]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    patch:
+      operationId: updateMe
+      tags: [users]
+      summary: Update current user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  # ── Kanè (Bank Account Ledger) ─────────────────────────────────────────────
+  /kane:
+    get:
+      operationId: getKane
+      tags: [kane]
+      summary: Get my Kanè (bank account ledger)
+      responses:
+        "200":
+          description: Kanè ledger
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Kane"
+
+  # ── Transactions ───────────────────────────────────────────────────────────
+  /transactions:
+    get:
+      operationId: listTransactions
+      tags: [transactions]
+      summary: List my transactions
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [deposit, withdrawal, transfer, loan_disbursement, loan_repayment, partner_payment]
+      responses:
+        "200":
+          description: List of transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+
+  /transactions/deposit:
+    post:
+      operationId: deposit
+      tags: [transactions]
+      summary: Deposit funds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepositInput"
+      responses:
+        "201":
+          description: Deposit recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /transactions/withdraw:
+    post:
+      operationId: withdraw
+      tags: [transactions]
+      summary: Withdraw funds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WithdrawInput"
+      responses:
+        "201":
+          description: Withdrawal recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /transactions/transfer:
+    post:
+      operationId: transfer
+      tags: [transactions]
+      summary: Transfer money to another account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferInput"
+      responses:
+        "201":
+          description: Transfer completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /transactions/summary:
+    get:
+      operationId: getTransactionSummary
+      tags: [transactions]
+      summary: Get transaction summary stats
+      responses:
+        "200":
+          description: Transaction summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionSummary"
+
+  # ── Loans ──────────────────────────────────────────────────────────────────
+  /loans:
+    get:
+      operationId: listMyLoans
+      tags: [loans]
+      summary: List my loans
+      responses:
+        "200":
+          description: My loans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Loan"
+    post:
+      operationId: requestLoan
+      tags: [loans]
+      summary: Request a loan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoanRequest"
+      responses:
+        "201":
+          description: Loan request submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Loan"
+
+  /loans/{loanId}/repay:
+    post:
+      operationId: repayLoan
+      tags: [loans]
+      summary: Make a loan repayment
+      parameters:
+        - name: loanId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RepaymentInput"
+      responses:
+        "200":
+          description: Repayment made
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Loan"
+
+  # ── Partners ───────────────────────────────────────────────────────────────
+  /partners:
+    get:
+      operationId: listPartners
+      tags: [partners]
+      summary: List all partners
+      responses:
+        "200":
+          description: Partners
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Partner"
+    post:
+      operationId: applyPartner
+      tags: [partners]
+      summary: Apply to become a Pyram partner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PartnerApplication"
+      responses:
+        "201":
+          description: Application submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Partner"
+
+  /partners/me:
+    get:
+      operationId: getMyPartner
+      tags: [partners]
+      summary: Get my partner profile (if exists)
+      responses:
+        "200":
+          description: My partner profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Partner"
+
+  /partners/{partnerId}/pay:
+    post:
+      operationId: payPartner
+      tags: [partners]
+      summary: Pay a partner
+      parameters:
+        - name: partnerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PartnerPaymentInput"
+      responses:
+        "201":
+          description: Payment made
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  # ── Admin ──────────────────────────────────────────────────────────────────
+  /admin/users:
+    get:
+      operationId: adminListUsers
+      tags: [admin]
+      summary: Admin — list all users with their Kanè
+      responses:
+        "200":
+          description: All users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminUserView"
+
+  /admin/users/{userId}:
+    get:
+      operationId: adminGetUser
+      tags: [admin]
+      summary: Admin — get a specific user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUserView"
+
+  /admin/transactions:
+    get:
+      operationId: adminListTransactions
+      tags: [admin]
+      summary: Admin — list all transactions globally
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: userId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: All transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+
+  /admin/loans:
+    get:
+      operationId: adminListLoans
+      tags: [admin]
+      summary: Admin — list all loan requests
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, rejected, repaid]
+      responses:
+        "200":
+          description: All loans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Loan"
+
+  /admin/loans/{loanId}/approve:
+    post:
+      operationId: adminApproveLoan
+      tags: [admin]
+      summary: Admin — approve a loan
+      parameters:
+        - name: loanId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Loan approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Loan"
+
+  /admin/loans/{loanId}/reject:
+    post:
+      operationId: adminRejectLoan
+      tags: [admin]
+      summary: Admin — reject a loan
+      parameters:
+        - name: loanId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Loan rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Loan"
+
+  /admin/partners/{partnerId}/approve:
+    post:
+      operationId: adminApprovePartner
+      tags: [admin]
+      summary: Admin — approve a partner application
+      parameters:
+        - name: partnerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Partner approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Partner"
+
+  /admin/partners/{partnerId}/reject:
+    post:
+      operationId: adminRejectPartner
+      tags: [admin]
+      summary: Admin — reject a partner application
+      parameters:
+        - name: partnerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Partner rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Partner"
+
+  /admin/stats:
+    get:
+      operationId: adminGetStats
+      tags: [admin]
+      summary: Admin — get global bank stats
+      responses:
+        "200":
+          description: Bank stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /admin/users/{userId}/credit-score:
+    patch:
+      operationId: adminUpdateCreditScore
+      tags: [admin]
+      summary: Admin — update a user's credit score
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreditScoreUpdate"
+      responses:
+        "200":
+          description: Updated Kane
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Kane"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    User:
+      type: object
+      required: [id, clerkId, email, firstName, lastName, role, createdAt]
+      properties:
+        id:         { type: integer }
+        clerkId:    { type: string }
+        email:      { type: string }
+        firstName:  { type: string }
+        lastName:   { type: string }
+        phone:      { type: ["string", "null"] }
+        role:       { type: string, enum: [user, admin] }
+        createdAt:  { type: string }
+
+    UserUpdate:
+      type: object
+      properties:
+        firstName: { type: string }
+        lastName:  { type: string }
+        phone:     { type: string }
+
+    Kane:
+      type: object
+      required: [id, userId, accountNumber, cardNumber, cardExpiry, cardCvv, balance, creditScore, createdAt]
+      properties:
+        id:            { type: integer }
+        userId:        { type: integer }
+        accountNumber: { type: string }
+        cardNumber:    { type: string }
+        cardExpiry:    { type: string }
+        cardCvv:       { type: string }
+        balance:       { type: number }
+        creditScore:   { type: integer }
+        createdAt:     { type: string }
+
+    Transaction:
+      type: object
+      required: [id, userId, type, amount, description, status, createdAt]
+      properties:
+        id:               { type: integer }
+        userId:           { type: integer }
+        type:             { type: string, enum: [deposit, withdrawal, transfer, loan_disbursement, loan_repayment, partner_payment] }
+        amount:           { type: number }
+        description:      { type: string }
+        status:           { type: string, enum: [completed, pending, failed] }
+        recipientAccount: { type: ["string", "null"] }
+        recipientName:    { type: ["string", "null"] }
+        senderAccount:    { type: ["string", "null"] }
+        createdAt:        { type: string }
+
+    TransactionSummary:
+      type: object
+      required: [totalDeposits, totalWithdrawals, totalTransfers, balance, transactionCount]
+      properties:
+        totalDeposits:    { type: number }
+        totalWithdrawals: { type: number }
+        totalTransfers:   { type: number }
+        balance:          { type: number }
+        transactionCount: { type: integer }
+
+    DepositInput:
+      type: object
+      required: [amount]
+      properties:
+        amount:      { type: number, minimum: 0.01 }
+        description: { type: string }
+
+    WithdrawInput:
+      type: object
+      required: [amount]
+      properties:
+        amount:      { type: number, minimum: 0.01 }
+        description: { type: string }
+
+    TransferInput:
+      type: object
+      required: [amount, recipientAccount]
+      properties:
+        amount:           { type: number, minimum: 0.01 }
+        recipientAccount: { type: string }
+        description:      { type: string }
+
+    Loan:
+      type: object
+      required: [id, userId, amount, purpose, status, amountRepaid, createdAt]
+      properties:
+        id:              { type: integer }
+        userId:          { type: integer }
+        amount:          { type: number }
+        purpose:         { type: string }
+        status:          { type: string, enum: [pending, approved, rejected, repaid] }
+        amountRepaid:    { type: number }
+        approvedAt:      { type: ["string", "null"] }
+        rejectedAt:      { type: ["string", "null"] }
+        createdAt:       { type: string }
+        userName:        { type: ["string", "null"] }
+        userEmail:       { type: ["string", "null"] }
+
+    LoanRequest:
+      type: object
+      required: [amount, purpose]
+      properties:
+        amount:  { type: number, minimum: 100 }
+        purpose: { type: string, minLength: 5 }
+
+    RepaymentInput:
+      type: object
+      required: [amount]
+      properties:
+        amount: { type: number, minimum: 0.01 }
+
+    Partner:
+      type: object
+      required: [id, userId, businessName, businessType, status, createdAt]
+      properties:
+        id:            { type: integer }
+        userId:        { type: integer }
+        businessName:  { type: string }
+        businessType:  { type: string }
+        description:   { type: ["string", "null"] }
+        status:        { type: string, enum: [pending, approved, rejected] }
+        onboardingFee: { type: number }
+        createdAt:     { type: string }
+        accountNumber: { type: ["string", "null"] }
+
+    PartnerApplication:
+      type: object
+      required: [businessName, businessType]
+      properties:
+        businessName:  { type: string, minLength: 2 }
+        businessType:  { type: string }
+        description:   { type: string }
+
+    PartnerPaymentInput:
+      type: object
+      required: [amount]
+      properties:
+        amount:      { type: number, minimum: 0.01 }
+        description: { type: string }
+
+    AdminUserView:
+      type: object
+      required: [id, clerkId, email, firstName, lastName, role, createdAt]
+      properties:
+        id:          { type: integer }
+        clerkId:     { type: string }
+        email:       { type: string }
+        firstName:   { type: string }
+        lastName:    { type: string }
+        role:        { type: string, enum: [user, admin] }
+        createdAt:   { type: string }
+        kane:
+          $ref: "#/components/schemas/Kane"
+        activeLoans:
+          type: array
+          items:
+            $ref: "#/components/schemas/Loan"
+
+    AdminStats:
+      type: object
+      required: [totalUsers, totalBalance, totalTransactions, pendingLoans, activeLoans, totalLoansIssued, totalPartnersApproved]
+      properties:
+        totalUsers:            { type: integer }
+        totalBalance:          { type: number }
+        totalTransactions:     { type: integer }
+        pendingLoans:          { type: integer }
+        activeLoans:           { type: integer }
+        totalLoansIssued:      { type: number }
+        totalPartnersApproved: { type: integer }
+
+    CreditScoreUpdate:
+      type: object
+      required: [creditScore]
+      properties:
+        creditScore: { type: integer, minimum: 300, maximum: 850 }
