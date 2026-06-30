@@ -32,7 +32,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="w-8 h-8 bg-amber-500 rounded-sm flex items-center justify-center">
               <span className="text-slate-900 font-serif font-bold text-xl leading-none">P</span>
             </div>
-            <span className="text-white font-serif text-xl tracking-tight">Pyram Sterling</span>
+            <span className="text-white font-serif text-xl tracking-tight">Pyram Sterling Bank</span>
           </Link>
         </div>
 
@@ -75,7 +75,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <header className="h-16 border-b bg-white flex items-center justify-between px-8 sticky top-0 z-10">
           <h2 className="font-serif text-xl text-slate-900">
             {isAdmin ? <span className="bg-amber-100 text-amber-800 text-xs font-sans px-2 py-1 rounded mr-3 align-middle tracking-wider font-bold">ADMIN</span> : null}
-            Private Banking
+            Pyram Sterling Bank
           </h2>
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">

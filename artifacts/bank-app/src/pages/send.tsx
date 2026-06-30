@@ -46,7 +46,7 @@ export default function SendPage() {
       <div className="max-w-2xl mx-auto space-y-8">
         <div>
           <h1 className="text-3xl font-serif text-slate-900 tracking-tight">Transfer Funds</h1>
-          <p className="text-slate-500 mt-1">Send money securely to another Pyram Sterling account.</p>
+          <p className="text-slate-500 mt-1">Send money securely to another Pyram Sterling Bank account.</p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">

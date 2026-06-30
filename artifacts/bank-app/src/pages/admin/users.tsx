@@ -17,7 +17,7 @@ export default function AdminUsersPage() {
 
   const [newScore, setNewScore] = useState("");
 
-  const handleUpdateScore = (userId: number) => {
+  const handleUpdateScore = (userId: string) => {
     if (!newScore) return;
     updateScore.mutate(
       { userId, data: { creditScore: Number(newScore) } },
@@ -86,7 +86,7 @@ export default function AdminUsersPage() {
                               <div className="flex-1 space-y-2">
                                 <Input type="number" min="300" max="850" value={newScore} onChange={(e) => setNewScore(e.target.value)} placeholder="300-850" />
                               </div>
-                              <Button onClick={() => handleUpdateScore(user.id)} disabled={updateScore.isPending}>Save</Button>
+                              <Button onClick={() => handleUpdateScore(user.clerkId)} disabled={updateScore.isPending}>Save</Button>
                             </div>
                           </DialogContent>
                         </Dialog>

@@ -7,6 +7,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useGetMe } from "@workspace/api-client-react";
 
 import LandingPage from "@/pages/landing";
 import DashboardPage from "@/pages/dashboard";
@@ -83,6 +84,26 @@ function ProtectedRoute({ component: Component }: { component: any }) {
   );
 }
 
+function AdminRouteInner({ component: Component }: { component: any }) {
+  const { data: profile, isLoading } = useGetMe();
+  if (isLoading) return null;
+  if (profile?.role !== "admin") return <Redirect to="/dashboard" />;
+  return <Component />;
+}
+
+function AdminRoute({ component: Component }: { component: any }) {
+  return (
+    <>
+      <Show when="signed-in">
+        <AdminRouteInner component={Component} />
+      </Show>
+      <Show when="signed-out">
+        <Redirect to="/" />
+      </Show>
+    </>
+  );
+}
+
 function ClerkQueryClientCacheInvalidator() {
   const { addListener } = useClerk();
   const queryClient = useQueryClient();
@@ -132,11 +153,11 @@ function ClerkProviderWithRoutes() {
             <Route path="/partners">{() => <ProtectedRoute component={PartnersPage} />}</Route>
             <Route path="/profile">{() => <ProtectedRoute component={ProfilePage} />}</Route>
             
-            <Route path="/admin">{() => <ProtectedRoute component={AdminDashboardPage} />}</Route>
-            <Route path="/admin/users">{() => <ProtectedRoute component={AdminUsersPage} />}</Route>
-            <Route path="/admin/transactions">{() => <ProtectedRoute component={AdminTransactionsPage} />}</Route>
-            <Route path="/admin/loans">{() => <ProtectedRoute component={AdminLoansPage} />}</Route>
-            <Route path="/admin/partners">{() => <ProtectedRoute component={AdminPartnersPage} />}</Route>
+            <Route path="/admin">{() => <AdminRoute component={AdminDashboardPage} />}</Route>
+            <Route path="/admin/users">{() => <AdminRoute component={AdminUsersPage} />}</Route>
+            <Route path="/admin/transactions">{() => <AdminRoute component={AdminTransactionsPage} />}</Route>
+            <Route path="/admin/loans">{() => <AdminRoute component={AdminLoansPage} />}</Route>
+            <Route path="/admin/partners">{() => <AdminRoute component={AdminPartnersPage} />}</Route>
 
             <Route component={NotFound} />
           </Switch>

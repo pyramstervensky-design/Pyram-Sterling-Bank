@@ -68,7 +68,7 @@ export default function PartnersPage() {
         <Card className="bg-slate-900 text-white border-none">
           <CardHeader>
             <CardTitle className="font-serif text-amber-500">Merchant Portal</CardTitle>
-            <CardDescription className="text-slate-400">Become a Pyram Sterling verified partner to accept payments directly.</CardDescription>
+            <CardDescription className="text-slate-400">Become a Pyram Sterling Bank verified partner to accept payments directly.</CardDescription>
           </CardHeader>
           <CardContent>
             {!myPartnerLoading && !myPartner && (
