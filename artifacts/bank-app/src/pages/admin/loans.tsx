@@ -63,7 +63,7 @@ export default function AdminLoansPage() {
                       </TableCell>
                       <TableCell>{loan.purpose}</TableCell>
                       <TableCell className="text-right font-medium">
-                        ${loan.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        G {loan.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </TableCell>
                       <TableCell>
                         <Badge className={

@@ -29,7 +29,7 @@ export default function LoansPage() {
       { data: { amount: Number(amount), purpose } },
       {
         onSuccess: () => {
-          toast({ title: "Loan Requested", description: `Requested $${amount}` });
+          toast({ title: "Loan Requested", description: `Requested G ${amount}` });
           setAmount("");
           setPurpose("");
           queryClient.invalidateQueries({ queryKey: getListMyLoansQueryKey() });
@@ -44,7 +44,7 @@ export default function LoansPage() {
       { loanId, data: { amount: Number(repayAmount) } },
       {
         onSuccess: () => {
-          toast({ title: "Repayment Successful", description: `Paid $${repayAmount}` });
+          toast({ title: "Repayment Successful", description: `Paid G ${repayAmount}` });
           setRepayAmount("");
           queryClient.invalidateQueries({ queryKey: getListMyLoansQueryKey() });
           queryClient.invalidateQueries({ queryKey: getGetKaneQueryKey() });
@@ -82,7 +82,7 @@ export default function LoansPage() {
               </DialogHeader>
               <form onSubmit={handleRequest} className="space-y-4 pt-4">
                 <div className="space-y-2">
-                  <Label>Amount (USD)</Label>
+                  <Label>Amount (HTG)</Label>
                   <Input type="number" min="100" value={amount} onChange={(e) => setAmount(e.target.value)} required />
                 </div>
                 <div className="space-y-2">
@@ -111,7 +111,7 @@ export default function LoansPage() {
               <Card key={loan.id} className="overflow-hidden">
                 <CardHeader className="bg-slate-50 border-b pb-4 flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle className="text-xl font-serif">${loan.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</CardTitle>
+                    <CardTitle className="text-xl font-serif">G {loan.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</CardTitle>
                     <CardDescription>{loan.purpose}</CardDescription>
                   </div>
                   <Badge className={getStatusColor(loan.status)}>{loan.status}</Badge>
@@ -120,11 +120,11 @@ export default function LoansPage() {
                   <div className="flex justify-between items-center mb-6">
                     <div>
                       <p className="text-sm text-slate-500 mb-1">Repaid</p>
-                      <p className="font-medium text-lg">${loan.amountRepaid.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                      <p className="font-medium text-lg">G {loan.amountRepaid.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-slate-500 mb-1">Remaining Balance</p>
-                      <p className="font-medium text-lg text-slate-900">${(loan.amount - loan.amountRepaid).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                      <p className="font-medium text-lg text-slate-900">G {(loan.amount - loan.amountRepaid).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                     </div>
                   </div>
                   

@@ -27,7 +27,7 @@ export default function SendPage() {
       { data: { amount: Number(amount), recipientAccount: recipient, description } },
       {
         onSuccess: () => {
-          toast({ title: "Transfer Successful", description: `Sent $${amount} to ${recipient}` });
+          toast({ title: "Transfer Successful", description: `Sent G ${amount} to ${recipient}` });
           setAmount("");
           setRecipient("");
           setDescription("");
@@ -53,12 +53,12 @@ export default function SendPage() {
           <Card className="md:col-span-2">
             <CardHeader>
               <CardTitle>Transfer Details</CardTitle>
-              <CardDescription>Available balance: ${kane?.balance?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}</CardDescription>
+              <CardDescription>Available balance: G {kane?.balance?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}</CardDescription>
             </CardHeader>
             <form onSubmit={handleTransfer}>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="amount">Amount (USD)</Label>
+                  <Label htmlFor="amount">Amount (HTG)</Label>
                   <Input 
                     id="amount" 
                     type="number" 
@@ -112,7 +112,7 @@ export default function SendPage() {
             <Card className="bg-slate-50 border-none shadow-none">
               <CardContent className="p-6 text-sm text-slate-600 space-y-4">
                 <h4 className="font-semibold text-slate-900">Transfer Limits</h4>
-                <p>Standard accounts can transfer up to $50,000 per day.</p>
+                <p>Standard accounts can transfer up to G 50,000 per day.</p>
                 <h4 className="font-semibold text-slate-900 pt-2">Security</h4>
                 <p>All transfers are encrypted and monitored for fraudulent activity.</p>
               </CardContent>

@@ -38,7 +38,7 @@ router.post("/", requireAuth, async (req, res) => {
   const { amount, purpose } = req.body as { amount: number; purpose: string };
 
   if (!amount || amount < 100) {
-    res.status(400).json({ error: "Minimum loan amount is $100" });
+    res.status(400).json({ error: "Minimum loan amount is 100 HTG" });
     return;
   }
   if (!purpose || purpose.length < 5) {

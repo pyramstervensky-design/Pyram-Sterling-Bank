@@ -54,7 +54,7 @@ export default function AdminTransactionsPage() {
                         }>{tx.status}</Badge>
                       </TableCell>
                       <TableCell className="text-right font-medium font-mono">
-                        ${tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        G {tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </TableCell>
                     </TableRow>
                   ))

@@ -47,7 +47,7 @@ export default function PartnersPage() {
       { partnerId, data: { amount: Number(payAmount), description: payDescription } },
       {
         onSuccess: () => {
-          toast({ title: "Payment Successful", description: `Paid $${payAmount}` });
+          toast({ title: "Payment Successful", description: `Paid G ${payAmount}` });
           setPayAmount("");
           setPayDescription("");
           queryClient.invalidateQueries({ queryKey: getGetKaneQueryKey() });
@@ -133,7 +133,7 @@ export default function PartnersPage() {
                     </DialogHeader>
                     <div className="space-y-4 pt-4">
                       <div className="space-y-2">
-                        <Label>Amount (USD)</Label>
+                        <Label>Amount (HTG)</Label>
                         <Input type="number" min="0.01" step="0.01" value={payAmount} onChange={(e) => setPayAmount(e.target.value)} required />
                       </div>
                       <div className="space-y-2">

@@ -32,7 +32,7 @@ export default function AdminDashboardPage() {
               <Landmark className="w-4 h-4 text-slate-400" />
             </CardHeader>
             <CardContent>
-              {isLoading ? <Skeleton className="h-8 w-32" /> : <p className="text-3xl font-bold">${stats?.totalBalance?.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>}
+              {isLoading ? <Skeleton className="h-8 w-32" /> : <p className="text-3xl font-bold">G {stats?.totalBalance?.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>}
             </CardContent>
           </Card>
 

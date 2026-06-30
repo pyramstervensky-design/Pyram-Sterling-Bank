@@ -51,7 +51,7 @@ export default function DashboardPage() {
                   <Skeleton className="h-14 w-64 bg-slate-800" />
                 ) : (
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-light text-slate-400">$</span>
+                    <span className="text-3xl font-light text-slate-400">G</span>
                     <span className="text-6xl font-light tracking-tight">
                       {(kane?.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
@@ -107,7 +107,7 @@ export default function DashboardPage() {
                             </div>
                           </div>
                           <div className={`font-medium ${['deposit', 'loan_disbursement'].includes(tx.type) ? 'text-emerald-600' : 'text-slate-900'}`}>
-                            {['deposit', 'loan_disbursement'].includes(tx.type) ? '+' : '-'}${tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            {['deposit', 'loan_disbursement'].includes(tx.type) ? '+' : '-'}G {tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </div>
                         </div>
                       ))}

@@ -76,7 +76,7 @@ export default function TransactionsPage() {
                       </div>
                     </div>
                     <div className={`text-xl font-medium ${['deposit', 'loan_disbursement'].includes(tx.type) ? 'text-emerald-600' : 'text-slate-900'}`}>
-                      {['deposit', 'loan_disbursement'].includes(tx.type) ? '+' : '-'}${tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      {['deposit', 'loan_disbursement'].includes(tx.type) ? '+' : '-'}G {tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </div>
                   </div>
                 ))}

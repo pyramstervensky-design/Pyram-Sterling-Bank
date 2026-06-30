@@ -62,7 +62,7 @@ export default function AdminUsersPage() {
                       <TableCell>{user.email}</TableCell>
                       <TableCell className="font-mono text-xs">{user.kane?.accountNumber}</TableCell>
                       <TableCell className="text-right font-medium">
-                        ${user.kane?.balance?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}
+                        G {user.kane?.balance?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}
                       </TableCell>
                       <TableCell className="text-right">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
