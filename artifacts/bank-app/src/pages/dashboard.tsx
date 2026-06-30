@@ -10,6 +10,18 @@ import { ArrowDownRight, ArrowUpRight, Repeat, Landmark, ArrowRight } from "luci
 import { Link } from "wouter";
 import { format } from "date-fns";
 
+function translateType(type: string): string {
+  const map: Record<string, string> = {
+    deposit: "Depo",
+    withdrawal: "Retrè",
+    transfer: "Transfè",
+    loan_disbursement: "Deblokaj Prè",
+    loan_repayment: "Pèman Prè",
+    partner_payment: "Pèman Patnè",
+  };
+  return map[type] ?? type.replace("_", " ");
+}
+
 function TransactionIcon({ type }: { type: string }) {
   switch (type) {
     case 'deposit':
@@ -36,17 +48,17 @@ export default function DashboardPage() {
     <AppLayout>
       <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-serif text-slate-900 tracking-tight">Overview</h1>
-          <p className="text-slate-500 mt-1">Welcome back, {profile?.firstName || "Client"}. Here is your financial summary.</p>
+          <h1 className="text-3xl font-serif text-slate-900 tracking-tight">Apersi</h1>
+          <p className="text-slate-500 mt-1">Byenveni, {profile?.firstName || "Kliyan"}. Men rezime finansye ou.</p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Balance & Card */}
+          {/* Balans ak Kat */}
           <div className="lg:col-span-2 space-y-8">
             <Card className="bg-slate-900 text-white border-slate-800 shadow-xl overflow-hidden relative">
               <div className="absolute top-0 right-0 p-32 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-800 via-transparent to-transparent opacity-50 pointer-events-none" />
               <CardContent className="p-8 relative z-10">
-                <p className="text-slate-400 font-medium tracking-wide text-sm uppercase mb-2">Total Balance</p>
+                <p className="text-slate-400 font-medium tracking-wide text-sm uppercase mb-2">Balans Total</p>
                 {kaneLoading ? (
                   <Skeleton className="h-14 w-64 bg-slate-800" />
                 ) : (
@@ -60,10 +72,10 @@ export default function DashboardPage() {
                 
                 <div className="mt-8 flex gap-4">
                   <Link href="/send" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-amber-500 text-slate-950 shadow hover:bg-amber-500/90 h-10 px-6 py-2">
-                    Transfer Funds
+                    Voye Lajan
                   </Link>
                   <Link href="/transactions" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-slate-700 bg-slate-800/50 text-white hover:bg-slate-800 h-10 px-6 py-2">
-                    View History
+                    Wè Istwa
                   </Link>
                 </div>
               </CardContent>
@@ -71,9 +83,9 @@ export default function DashboardPage() {
 
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-serif text-slate-900">Recent Activity</h3>
+                <h3 className="text-lg font-serif text-slate-900">Aktivite Resan</h3>
                 <Link href="/transactions" className="text-sm font-medium text-amber-600 hover:text-amber-700 flex items-center gap-1">
-                  View all <ArrowRight className="w-4 h-4" />
+                  Wè tout <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
               <Card>
@@ -93,7 +105,7 @@ export default function DashboardPage() {
                     </div>
                   ) : transactions?.length === 0 ? (
                     <div className="p-12 text-center text-slate-500">
-                      No recent transactions.
+                      Pa gen tranzaksyon resan.
                     </div>
                   ) : (
                     <div className="divide-y divide-slate-100">
@@ -102,8 +114,8 @@ export default function DashboardPage() {
                           <div className="flex items-center gap-4">
                             <TransactionIcon type={tx.type} />
                             <div>
-                              <p className="font-medium text-slate-900">{tx.description || tx.type.replace('_', ' ')}</p>
-                              <p className="text-sm text-slate-500">{format(new Date(tx.createdAt), "MMM d, yyyy 'at' h:mm a")}</p>
+                              <p className="font-medium text-slate-900">{tx.description || translateType(tx.type)}</p>
+                              <p className="text-sm text-slate-500">{format(new Date(tx.createdAt), "MMM d, yyyy 'a' h:mm a")}</p>
                             </div>
                           </div>
                           <div className={`font-medium ${['deposit', 'loan_disbursement'].includes(tx.type) ? 'text-emerald-600' : 'text-slate-900'}`}>
@@ -118,12 +130,12 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Right Column */}
+          {/* Kolòn Dwat */}
           <div className="space-y-8">
             <Card>
               <CardHeader>
-                <CardTitle className="font-serif">Virtual Card</CardTitle>
-                <CardDescription>Your active debit card</CardDescription>
+                <CardTitle className="font-serif">Kat Vityèl</CardTitle>
+                <CardDescription>Kat debi aktif ou</CardDescription>
               </CardHeader>
               <CardContent className="flex justify-center pb-8">
                 <VirtualCard 
@@ -138,8 +150,8 @@ export default function DashboardPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="font-serif">Credit Score</CardTitle>
-                <CardDescription>Based on FICO 8 model</CardDescription>
+                <CardTitle className="font-serif">Nòt Kredi</CardTitle>
+                <CardDescription>Baze sou modèl FICO 8</CardDescription>
               </CardHeader>
               <CardContent className="pb-8">
                 <CreditScore isLoading={kaneLoading} score={kane?.creditScore || 0} />

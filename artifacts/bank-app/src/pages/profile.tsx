@@ -32,7 +32,7 @@ export default function ProfilePage() {
       { data: { firstName, lastName, phone } },
       {
         onSuccess: () => {
-          toast({ title: "Profile Updated" });
+          toast({ title: "Pwofil Mete Ajou" });
           queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
         }
       }
@@ -43,39 +43,39 @@ export default function ProfilePage() {
     <AppLayout>
       <div className="max-w-2xl mx-auto space-y-8">
         <div>
-          <h1 className="text-3xl font-serif text-slate-900 tracking-tight">Profile Settings</h1>
-          <p className="text-slate-500 mt-1">Manage your personal information.</p>
+          <h1 className="text-3xl font-serif text-slate-900 tracking-tight">Paramèt Pwofil</h1>
+          <p className="text-slate-500 mt-1">Jere enfòmasyon pèsonèl ou.</p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Personal Details</CardTitle>
-            <CardDescription>Update your contact information.</CardDescription>
+            <CardTitle>Detay Pèsonèl</CardTitle>
+            <CardDescription>Mete enfòmasyon kontak ou ajou.</CardDescription>
           </CardHeader>
           <form onSubmit={handleUpdate}>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>First Name</Label>
+                  <Label>Prenon</Label>
                   <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
                 </div>
                 <div className="space-y-2">
-                  <Label>Last Name</Label>
+                  <Label>Siyati</Label>
                   <Input value={lastName} onChange={(e) => setLastName(e.target.value)} required />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Email</Label>
+                <Label>Imèl</Label>
                 <Input value={profile?.email || ""} disabled className="bg-slate-50 text-slate-500" />
-                <p className="text-xs text-slate-500">Email cannot be changed.</p>
+                <p className="text-xs text-slate-500">Imèl pa ka chanje.</p>
               </div>
               <div className="space-y-2">
-                <Label>Phone Number</Label>
+                <Label>Nimewo Telefòn</Label>
                 <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
               </div>
             </CardContent>
             <div className="p-6 bg-slate-50 border-t rounded-b-xl flex justify-end">
-              <Button type="submit" disabled={updateMe.isPending}>Save Changes</Button>
+              <Button type="submit" disabled={updateMe.isPending}>Sove Chanjman</Button>
             </div>
           </form>
         </Card>

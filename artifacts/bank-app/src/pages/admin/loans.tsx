@@ -8,6 +8,16 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 
+function translateStatus(status: string): string {
+  const map: Record<string, string> = {
+    pending: "An atant",
+    approved: "Apwouve",
+    rejected: "Rejte",
+    repaid: "Ranbouse",
+  };
+  return map[status] ?? status;
+}
+
 export default function AdminLoansPage() {
   const { data: loans, isLoading } = useAdminListLoans();
   const approveLoan = useAdminApproveLoan();
@@ -21,7 +31,7 @@ export default function AdminLoansPage() {
       { loanId: id },
       {
         onSuccess: () => {
-          toast({ title: `Loan ${action}d successfully` });
+          toast({ title: action === 'approve' ? 'Prè apwouve avèk siksè' : 'Prè rejte avèk siksè' });
           queryClient.invalidateQueries({ queryKey: getAdminListLoansQueryKey() });
           queryClient.invalidateQueries({ queryKey: getAdminGetStatsQueryKey() });
         }
@@ -33,8 +43,8 @@ export default function AdminLoansPage() {
     <AppLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-serif text-slate-900 tracking-tight">Loan Approvals</h1>
-          <p className="text-slate-500 mt-1">Review and manage customer loan requests.</p>
+          <h1 className="text-3xl font-serif text-slate-900 tracking-tight">Apwobasyon Prè</h1>
+          <p className="text-slate-500 mt-1">Revize epi jere demann prè kliyan yo.</p>
         </div>
 
         <Card>
@@ -42,17 +52,17 @@ export default function AdminLoansPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Purpose</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Dat</TableHead>
+                  <TableHead>Kliyan</TableHead>
+                  <TableHead>Bi</TableHead>
+                  <TableHead className="text-right">Montan</TableHead>
+                  <TableHead>Estati</TableHead>
+                  <TableHead className="text-right">Aksyon</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
-                  <TableRow><TableCell colSpan={6} className="text-center p-8">Loading...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} className="text-center p-8">Ap chaje...</TableCell></TableRow>
                 ) : (
                   loans?.map((loan) => (
                     <TableRow key={loan.id}>
@@ -71,13 +81,13 @@ export default function AdminLoansPage() {
                           loan.status === 'rejected' ? 'bg-rose-100 text-rose-800' :
                           loan.status === 'repaid' ? 'bg-blue-100 text-blue-800' :
                           'bg-amber-100 text-amber-800'
-                        }>{loan.status}</Badge>
+                        }>{translateStatus(loan.status)}</Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         {loan.status === 'pending' && (
                           <div className="flex justify-end gap-2">
-                            <Button size="sm" variant="outline" className="text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => handleAction(loan.id, 'reject')} disabled={rejectLoan.isPending || approveLoan.isPending}>Reject</Button>
-                            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" onClick={() => handleAction(loan.id, 'approve')} disabled={rejectLoan.isPending || approveLoan.isPending}>Approve</Button>
+                            <Button size="sm" variant="outline" className="text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => handleAction(loan.id, 'reject')} disabled={rejectLoan.isPending || approveLoan.isPending}>Rejte</Button>
+                            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" onClick={() => handleAction(loan.id, 'approve')} disabled={rejectLoan.isPending || approveLoan.isPending}>Apwouve</Button>
                           </div>
                         )}
                       </TableCell>

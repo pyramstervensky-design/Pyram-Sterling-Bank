@@ -27,7 +27,7 @@ export default function SendPage() {
       { data: { amount: Number(amount), recipientAccount: recipient, description } },
       {
         onSuccess: () => {
-          toast({ title: "Transfer Successful", description: `Sent G ${amount} to ${recipient}` });
+          toast({ title: "Transfè Reyisi", description: `Voye G ${amount} bay ${recipient}` });
           setAmount("");
           setRecipient("");
           setDescription("");
@@ -35,7 +35,7 @@ export default function SendPage() {
           queryClient.invalidateQueries({ queryKey: getListTransactionsQueryKey() });
         },
         onError: (err: any) => {
-          toast({ title: "Transfer Failed", description: err.message || "Something went wrong", variant: "destructive" });
+          toast({ title: "Transfè Echwe", description: err.message || "Yon bagay mal pase", variant: "destructive" });
         }
       }
     );
@@ -45,20 +45,20 @@ export default function SendPage() {
     <AppLayout>
       <div className="max-w-2xl mx-auto space-y-8">
         <div>
-          <h1 className="text-3xl font-serif text-slate-900 tracking-tight">Transfer Funds</h1>
-          <p className="text-slate-500 mt-1">Send money securely to another Pyram Sterling Bank account.</p>
+          <h1 className="text-3xl font-serif text-slate-900 tracking-tight">Voye Lajan</h1>
+          <p className="text-slate-500 mt-1">Voye lajan an sekirite nan yon lòt kont Pyram Sterling Bank.</p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
           <Card className="md:col-span-2">
             <CardHeader>
-              <CardTitle>Transfer Details</CardTitle>
-              <CardDescription>Available balance: G {kane?.balance?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}</CardDescription>
+              <CardTitle>Detay Transfè</CardTitle>
+              <CardDescription>Balans disponib: G {kane?.balance?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}</CardDescription>
             </CardHeader>
             <form onSubmit={handleTransfer}>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="amount">Amount (HTG)</Label>
+                  <Label htmlFor="amount">Montan (HTG)</Label>
                   <Input 
                     id="amount" 
                     type="number" 
@@ -72,20 +72,20 @@ export default function SendPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="recipient">Recipient Account Number</Label>
+                  <Label htmlFor="recipient">Nimewo Kont Destinatè</Label>
                   <Input 
                     id="recipient" 
-                    placeholder="e.g. 1000000002" 
+                    placeholder="eks: PSB1000000002" 
                     value={recipient}
                     onChange={(e) => setRecipient(e.target.value)}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description (Optional)</Label>
+                  <Label htmlFor="description">Deskripsyon (Opsyonèl)</Label>
                   <Input 
                     id="description" 
-                    placeholder="e.g. Dinner reimbursement" 
+                    placeholder="eks: Ranbousman dine" 
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                   />
@@ -97,10 +97,10 @@ export default function SendPage() {
                   className="w-full h-12 text-base font-medium bg-amber-500 hover:bg-amber-600 text-slate-950"
                   disabled={transfer.isPending || !amount || !recipient}
                 >
-                  {transfer.isPending ? "Processing..." : (
+                  {transfer.isPending ? "Ap trete..." : (
                     <>
                       <SendIcon className="w-5 h-5 mr-2" />
-                      Send Transfer
+                      Voye Transfè
                     </>
                   )}
                 </Button>
@@ -111,10 +111,10 @@ export default function SendPage() {
           <div className="space-y-4">
             <Card className="bg-slate-50 border-none shadow-none">
               <CardContent className="p-6 text-sm text-slate-600 space-y-4">
-                <h4 className="font-semibold text-slate-900">Transfer Limits</h4>
-                <p>Standard accounts can transfer up to G 50,000 per day.</p>
-                <h4 className="font-semibold text-slate-900 pt-2">Security</h4>
-                <p>All transfers are encrypted and monitored for fraudulent activity.</p>
+                <h4 className="font-semibold text-slate-900">Limit Transfè</h4>
+                <p>Kont estanda ka transfere jiska G 50,000 pa jou.</p>
+                <h4 className="font-semibold text-slate-900 pt-2">Sekirite</h4>
+                <p>Tout transfè yo chifre epi surveye pou aktivite fwodè.</p>
               </CardContent>
             </Card>
           </div>

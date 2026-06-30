@@ -7,6 +7,18 @@ import { ArrowDownRight, ArrowUpRight, Repeat, Landmark, ArrowRight, Filter } fr
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
+function translateType(type: string): string {
+  const map: Record<string, string> = {
+    deposit: "Depo",
+    withdrawal: "Retrè",
+    transfer: "Transfè",
+    loan_disbursement: "Deblokaj Prè",
+    loan_repayment: "Pèman Prè",
+    partner_payment: "Pèman Patnè",
+  };
+  return map[type] ?? type.replace("_", " ");
+}
+
 export default function TransactionsPage() {
   const [filter, setFilter] = useState<string>("all");
   const { data: transactions, isLoading } = useListTransactions(
@@ -18,14 +30,14 @@ export default function TransactionsPage() {
       <div className="space-y-6 max-w-4xl mx-auto">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-serif text-slate-900 tracking-tight">Transactions</h1>
-            <p className="text-slate-500 mt-1">Your complete transaction history.</p>
+            <h1 className="text-3xl font-serif text-slate-900 tracking-tight">Tranzaksyon</h1>
+            <p className="text-slate-500 mt-1">Istwa konplè tranzaksyon ou.</p>
           </div>
           <div className="flex gap-2">
-            <Button variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")} size="sm">All</Button>
-            <Button variant={filter === "deposit" ? "default" : "outline"} onClick={() => setFilter("deposit")} size="sm">Deposits</Button>
-            <Button variant={filter === "withdrawal" ? "default" : "outline"} onClick={() => setFilter("withdrawal")} size="sm">Withdrawals</Button>
-            <Button variant={filter === "transfer" ? "default" : "outline"} onClick={() => setFilter("transfer")} size="sm">Transfers</Button>
+            <Button variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")} size="sm">Tout</Button>
+            <Button variant={filter === "deposit" ? "default" : "outline"} onClick={() => setFilter("deposit")} size="sm">Depo</Button>
+            <Button variant={filter === "withdrawal" ? "default" : "outline"} onClick={() => setFilter("withdrawal")} size="sm">Retrè</Button>
+            <Button variant={filter === "transfer" ? "default" : "outline"} onClick={() => setFilter("transfer")} size="sm">Transfè</Button>
           </div>
         </div>
 
@@ -47,8 +59,8 @@ export default function TransactionsPage() {
             ) : transactions?.length === 0 ? (
               <div className="p-16 text-center text-slate-500 flex flex-col items-center">
                 <Filter className="w-12 h-12 text-slate-300 mb-4" />
-                <p className="text-lg font-medium text-slate-900">No transactions found</p>
-                <p>Try adjusting your filters.</p>
+                <p className="text-lg font-medium text-slate-900">Pa jwenn tranzaksyon</p>
+                <p>Eseye chanje filtre ou yo.</p>
               </div>
             ) : (
               <div className="divide-y divide-slate-100">
@@ -66,11 +78,11 @@ export default function TransactionsPage() {
                       )}
                       
                       <div>
-                        <p className="font-medium text-slate-900 text-lg">{tx.description || tx.type.replace('_', ' ')}</p>
-                        <p className="text-sm text-slate-500">{format(new Date(tx.createdAt), "MMMM d, yyyy 'at' h:mm a")}</p>
+                        <p className="font-medium text-slate-900 text-lg">{tx.description || translateType(tx.type)}</p>
+                        <p className="text-sm text-slate-500">{format(new Date(tx.createdAt), "MMMM d, yyyy 'a' h:mm a")}</p>
                         {(tx.recipientAccount || tx.senderAccount) && (
                           <p className="text-xs text-slate-400 mt-1">
-                            {tx.recipientAccount ? `To: ${tx.recipientAccount}` : `From: ${tx.senderAccount}`}
+                            {tx.recipientAccount ? `Destinatè: ${tx.recipientAccount}` : `Expéditè: ${tx.senderAccount}`}
                           </p>
                         )}
                       </div>

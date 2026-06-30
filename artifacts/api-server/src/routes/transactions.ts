@@ -77,13 +77,13 @@ router.post("/deposit", requireAuth, async (req, res) => {
   const { amount, description } = req.body as { amount: number; description?: string };
 
   if (!amount || amount <= 0) {
-    res.status(400).json({ error: "Invalid amount" });
+    res.status(400).json({ error: "Montan pa valid" });
     return;
   }
 
   const [kane] = await db.select().from(kaneTable).where(eq(kaneTable.userId, user.id));
   if (!kane) {
-    res.status(404).json({ error: "Kane not found" });
+    res.status(404).json({ error: "Kont pa jwenn" });
     return;
   }
 
@@ -100,7 +100,7 @@ router.post("/deposit", requireAuth, async (req, res) => {
       userId: user.id,
       type: "deposit",
       amount: String(amount.toFixed(2)),
-      description: description ?? "Deposit",
+      description: description ?? "Depo",
       status: "completed",
     })
     .returning();
@@ -113,19 +113,19 @@ router.post("/withdraw", requireAuth, async (req, res) => {
   const { amount, description } = req.body as { amount: number; description?: string };
 
   if (!amount || amount <= 0) {
-    res.status(400).json({ error: "Invalid amount" });
+    res.status(400).json({ error: "Montan pa valid" });
     return;
   }
 
   const [kane] = await db.select().from(kaneTable).where(eq(kaneTable.userId, user.id));
   if (!kane) {
-    res.status(404).json({ error: "Kane not found" });
+    res.status(404).json({ error: "Kont pa jwenn" });
     return;
   }
 
   const currentBalance = parseFloat(kane.balance);
   if (currentBalance < amount) {
-    res.status(400).json({ error: "Insufficient funds" });
+    res.status(400).json({ error: "Pa gen ase lajan" });
     return;
   }
 
@@ -140,7 +140,7 @@ router.post("/withdraw", requireAuth, async (req, res) => {
       userId: user.id,
       type: "withdrawal",
       amount: String(amount.toFixed(2)),
-      description: description ?? "Withdrawal",
+      description: description ?? "Retrè",
       status: "completed",
     })
     .returning();
@@ -157,28 +157,28 @@ router.post("/transfer", requireAuth, async (req, res) => {
   };
 
   if (!amount || amount <= 0) {
-    res.status(400).json({ error: "Invalid amount" });
+    res.status(400).json({ error: "Montan pa valid" });
     return;
   }
   if (!recipientAccount) {
-    res.status(400).json({ error: "Recipient account required" });
+    res.status(400).json({ error: "Nimewo kont destinatè obligatwa" });
     return;
   }
 
   const [senderKane] = await db.select().from(kaneTable).where(eq(kaneTable.userId, user.id));
   if (!senderKane) {
-    res.status(404).json({ error: "Sender Kane not found" });
+    res.status(404).json({ error: "Kont expéditè pa jwenn" });
     return;
   }
 
   if (senderKane.accountNumber === recipientAccount) {
-    res.status(400).json({ error: "Cannot transfer to own account" });
+    res.status(400).json({ error: "Pa ka transfere nan pwòp kont ou" });
     return;
   }
 
   const currentBalance = parseFloat(senderKane.balance);
   if (currentBalance < amount) {
-    res.status(400).json({ error: "Insufficient funds" });
+    res.status(400).json({ error: "Pa gen ase lajan" });
     return;
   }
 
@@ -188,7 +188,7 @@ router.post("/transfer", requireAuth, async (req, res) => {
     .where(eq(kaneTable.accountNumber, recipientAccount));
 
   if (!recipientKane) {
-    res.status(404).json({ error: "Recipient account not found" });
+    res.status(404).json({ error: "Kont destinatè pa jwenn" });
     return;
   }
 
@@ -213,7 +213,7 @@ router.post("/transfer", requireAuth, async (req, res) => {
       userId: user.id,
       type: "transfer",
       amount: String(amount.toFixed(2)),
-      description: description ?? `Transfer to ${recipientAccount}`,
+      description: description ?? `Transfè bay ${recipientAccount}`,
       status: "completed",
       recipientAccount,
       recipientName: recipientUser ? `${recipientUser.firstName} ${recipientUser.lastName}` : null,

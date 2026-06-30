@@ -23,7 +23,7 @@ export default function AdminUsersPage() {
       { userId, data: { creditScore: Number(newScore) } },
       {
         onSuccess: () => {
-          toast({ title: "Credit Score Updated" });
+          toast({ title: "Nòt Kredi Mete Ajou" });
           setNewScore("");
           queryClient.invalidateQueries({ queryKey: getAdminListUsersQueryKey() });
         }
@@ -35,8 +35,8 @@ export default function AdminUsersPage() {
     <AppLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-serif text-slate-900 tracking-tight">User Management</h1>
-          <p className="text-slate-500 mt-1">View and manage all bank customers.</p>
+          <h1 className="text-3xl font-serif text-slate-900 tracking-tight">Jestyon Itilizatè</h1>
+          <p className="text-slate-500 mt-1">Wè epi jere tout kliyan bank yo.</p>
         </div>
 
         <Card>
@@ -44,17 +44,17 @@ export default function AdminUsersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Account Number</TableHead>
-                  <TableHead className="text-right">Balance</TableHead>
-                  <TableHead className="text-right">Credit Score</TableHead>
+                  <TableHead>Kliyan</TableHead>
+                  <TableHead>Imèl</TableHead>
+                  <TableHead>Nimewo Kont</TableHead>
+                  <TableHead className="text-right">Balans</TableHead>
+                  <TableHead className="text-right">Nòt Kredi</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
-                  <TableRow><TableCell colSpan={6} className="text-center p-8">Loading...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} className="text-center p-8">Ap chaje...</TableCell></TableRow>
                 ) : (
                   users?.map((user) => (
                     <TableRow key={user.id}>
@@ -76,17 +76,17 @@ export default function AdminUsersPage() {
                       <TableCell className="text-right">
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button variant="ghost" size="sm">Edit Score</Button>
+                            <Button variant="ghost" size="sm">Chanje Nòt</Button>
                           </DialogTrigger>
                           <DialogContent>
                             <DialogHeader>
-                              <DialogTitle>Update Credit Score</DialogTitle>
+                              <DialogTitle>Mete Nòt Kredi Ajou</DialogTitle>
                             </DialogHeader>
                             <div className="flex items-end gap-4 pt-4">
                               <div className="flex-1 space-y-2">
                                 <Input type="number" min="300" max="850" value={newScore} onChange={(e) => setNewScore(e.target.value)} placeholder="300-850" />
                               </div>
-                              <Button onClick={() => handleUpdateScore(user.clerkId)} disabled={updateScore.isPending}>Save</Button>
+                              <Button onClick={() => handleUpdateScore(user.clerkId)} disabled={updateScore.isPending}>Sove</Button>
                             </div>
                           </DialogContent>
                         </Dialog>

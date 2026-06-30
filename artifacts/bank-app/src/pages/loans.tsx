@@ -10,6 +10,16 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
+function translateStatus(status: string): string {
+  const map: Record<string, string> = {
+    pending: "An atant",
+    approved: "Apwouve",
+    rejected: "Rejte",
+    repaid: "Ranbouse",
+  };
+  return map[status] ?? status;
+}
+
 export default function LoansPage() {
   const { data: loans, isLoading } = useListMyLoans();
   const requestLoan = useRequestLoan();
@@ -29,7 +39,7 @@ export default function LoansPage() {
       { data: { amount: Number(amount), purpose } },
       {
         onSuccess: () => {
-          toast({ title: "Loan Requested", description: `Requested G ${amount}` });
+          toast({ title: "Prè Mande", description: `Mande G ${amount}` });
           setAmount("");
           setPurpose("");
           queryClient.invalidateQueries({ queryKey: getListMyLoansQueryKey() });
@@ -44,7 +54,7 @@ export default function LoansPage() {
       { loanId, data: { amount: Number(repayAmount) } },
       {
         onSuccess: () => {
-          toast({ title: "Repayment Successful", description: `Paid G ${repayAmount}` });
+          toast({ title: "Pèman Reyisi", description: `Peye G ${repayAmount}` });
           setRepayAmount("");
           queryClient.invalidateQueries({ queryKey: getListMyLoansQueryKey() });
           queryClient.invalidateQueries({ queryKey: getGetKaneQueryKey() });
@@ -68,29 +78,29 @@ export default function LoansPage() {
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-serif text-slate-900 tracking-tight">Loans & Credit</h1>
-            <p className="text-slate-500 mt-1">Manage your active loans and request new lines of credit.</p>
+            <h1 className="text-3xl font-serif text-slate-900 tracking-tight">Prè ak Kredi</h1>
+            <p className="text-slate-500 mt-1">Jere prè aktif ou yo epi mande nouvo liy kredi.</p>
           </div>
           
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-medium">Request New Loan</Button>
+              <Button className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-medium">Mande Nouvo Prè</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Request a Loan</DialogTitle>
+                <DialogTitle>Mande yon Prè</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleRequest} className="space-y-4 pt-4">
                 <div className="space-y-2">
-                  <Label>Amount (HTG)</Label>
+                  <Label>Montan (HTG)</Label>
                   <Input type="number" min="100" value={amount} onChange={(e) => setAmount(e.target.value)} required />
                 </div>
                 <div className="space-y-2">
-                  <Label>Purpose</Label>
+                  <Label>Bi</Label>
                   <Input value={purpose} onChange={(e) => setPurpose(e.target.value)} required minLength={5} />
                 </div>
                 <Button type="submit" className="w-full" disabled={requestLoan.isPending}>
-                  Submit Request
+                  Soumèt Demann
                 </Button>
               </form>
             </DialogContent>
@@ -103,7 +113,7 @@ export default function LoansPage() {
           ) : loans?.length === 0 ? (
             <Card className="bg-slate-50 border-dashed border-2">
               <CardContent className="p-12 text-center text-slate-500">
-                You have no loan history.
+                Ou pa gen istwa prè.
               </CardContent>
             </Card>
           ) : (
@@ -114,16 +124,16 @@ export default function LoansPage() {
                     <CardTitle className="text-xl font-serif">G {loan.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</CardTitle>
                     <CardDescription>{loan.purpose}</CardDescription>
                   </div>
-                  <Badge className={getStatusColor(loan.status)}>{loan.status}</Badge>
+                  <Badge className={getStatusColor(loan.status)}>{translateStatus(loan.status)}</Badge>
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="flex justify-between items-center mb-6">
                     <div>
-                      <p className="text-sm text-slate-500 mb-1">Repaid</p>
+                      <p className="text-sm text-slate-500 mb-1">Ranbouse</p>
                       <p className="font-medium text-lg">G {loan.amountRepaid.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-slate-500 mb-1">Remaining Balance</p>
+                      <p className="text-sm text-slate-500 mb-1">Balans ki Rete</p>
                       <p className="font-medium text-lg text-slate-900">G {(loan.amount - loan.amountRepaid).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                     </div>
                   </div>
@@ -131,17 +141,17 @@ export default function LoansPage() {
                   {loan.status === 'approved' && loan.amountRepaid < loan.amount && (
                     <div className="flex items-end gap-4 bg-slate-50 p-4 rounded-lg">
                       <div className="flex-1 space-y-2">
-                        <Label>Make a Repayment</Label>
+                        <Label>Fè yon Pèman</Label>
                         <Input 
                           type="number" 
                           max={loan.amount - loan.amountRepaid} 
                           value={repayAmount} 
                           onChange={(e) => setRepayAmount(e.target.value)} 
-                          placeholder="Amount"
+                          placeholder="Montan"
                         />
                       </div>
                       <Button onClick={() => handleRepay(loan.id)} disabled={!repayAmount || repayLoan.isPending}>
-                        Pay Now
+                        Peye Kounye a
                       </Button>
                     </div>
                   )}

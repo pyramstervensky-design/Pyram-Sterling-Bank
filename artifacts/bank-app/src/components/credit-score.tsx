@@ -21,16 +21,16 @@ export function CreditScore({ score, isLoading }: CreditScoreProps) {
   const strokeDashoffset = circumference - percentage * circumference;
 
   let colorClass = "text-red-500";
-  let statusText = "Poor";
+  let statusText = "Mal";
   if (normalizedScore >= 740) {
     colorClass = "text-emerald-500";
-    statusText = "Excellent";
+    statusText = "Ekselan";
   } else if (normalizedScore >= 670) {
     colorClass = "text-amber-500";
-    statusText = "Good";
+    statusText = "Bon";
   } else if (normalizedScore >= 580) {
     colorClass = "text-orange-500";
-    statusText = "Fair";
+    statusText = "Pasab";
   }
 
   return (
@@ -65,7 +65,7 @@ export function CreditScore({ score, isLoading }: CreditScoreProps) {
         </div>
       </div>
       <p className="text-xs text-slate-500 mt-4 text-center">
-        Scores range from 300 to 850.<br/>Updated automatically.
+        Nòt yo soti ant 300 ak 850.<br/>Mete ajou otomatikman.
       </p>
     </div>
   );

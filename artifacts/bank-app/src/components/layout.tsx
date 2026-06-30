@@ -25,7 +25,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
-      {/* Sidebar */}
+      {/* Bò Kote */}
       <aside className="w-64 bg-slate-950 flex flex-col border-r border-slate-800 flex-shrink-0">
         <div className="p-6">
           <Link href="/dashboard" className="flex items-center gap-2">
@@ -37,40 +37,40 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-4 px-3">Banking</div>
-          <NavLink href="/dashboard" icon={Home}>Dashboard</NavLink>
-          <NavLink href="/transactions" icon={ArrowRightLeft}>Transactions</NavLink>
-          <NavLink href="/send" icon={Send}>Transfer</NavLink>
+          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-4 px-3">Bankè</div>
+          <NavLink href="/dashboard" icon={Home}>Tablo de bò</NavLink>
+          <NavLink href="/transactions" icon={ArrowRightLeft}>Tranzaksyon</NavLink>
+          <NavLink href="/send" icon={Send}>Transfè</NavLink>
           
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-8 px-3">Wealth</div>
-          <NavLink href="/loans" icon={Landmark}>Loans</NavLink>
-          <NavLink href="/partners" icon={Users}>Partners</NavLink>
+          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-8 px-3">Richès</div>
+          <NavLink href="/loans" icon={Landmark}>Prè</NavLink>
+          <NavLink href="/partners" icon={Users}>Patnè</NavLink>
           
           {isAdmin && (
             <>
               <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-8 px-3">Admin</div>
-              <NavLink href="/admin" icon={ShieldAlert}>Overview</NavLink>
-              <NavLink href="/admin/users" icon={Users}>Users</NavLink>
-              <NavLink href="/admin/transactions" icon={ArrowRightLeft}>All Transactions</NavLink>
-              <NavLink href="/admin/loans" icon={Landmark}>Loan Approvals</NavLink>
-              <NavLink href="/admin/partners" icon={Users}>Partner Mgmt</NavLink>
+              <NavLink href="/admin" icon={ShieldAlert}>Apersi</NavLink>
+              <NavLink href="/admin/users" icon={Users}>Itilizatè</NavLink>
+              <NavLink href="/admin/transactions" icon={ArrowRightLeft}>Tout Tranzaksyon</NavLink>
+              <NavLink href="/admin/loans" icon={Landmark}>Apwobasyon Prè</NavLink>
+              <NavLink href="/admin/partners" icon={Users}>Jere Patnè</NavLink>
             </>
           )}
         </nav>
 
         <div className="p-4 border-t border-slate-800">
-          <NavLink href="/profile" icon={Settings}>Settings</NavLink>
+          <NavLink href="/profile" icon={Settings}>Paramèt</NavLink>
           <button 
             onClick={() => signOut({ redirectUrl: "/" })}
             className="flex w-full items-center gap-3 px-3 py-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-800/50 mt-1 transition-colors"
           >
             <LogOut className="w-5 h-5" />
-            <span className="font-medium">Sign Out</span>
+            <span className="font-medium">Dekonekte</span>
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Kontni Prensipal */}
       <main className="flex-1 overflow-y-auto bg-slate-50">
         <header className="h-16 border-b bg-white flex items-center justify-between px-8 sticky top-0 z-10">
           <h2 className="font-serif text-xl text-slate-900">

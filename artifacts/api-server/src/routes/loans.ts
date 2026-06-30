@@ -38,11 +38,11 @@ router.post("/", requireAuth, async (req, res) => {
   const { amount, purpose } = req.body as { amount: number; purpose: string };
 
   if (!amount || amount < 100) {
-    res.status(400).json({ error: "Minimum loan amount is 100 HTG" });
+    res.status(400).json({ error: "Montan minimòm prè se 100 HTG" });
     return;
   }
   if (!purpose || purpose.length < 5) {
-    res.status(400).json({ error: "Purpose must be at least 5 characters" });
+    res.status(400).json({ error: "Bi a dwe gen omwen 5 karaktè" });
     return;
   }
 
@@ -66,7 +66,7 @@ router.post("/:loanId/repay", requireAuth, async (req, res) => {
   const { amount } = req.body as { amount: number };
 
   if (!amount || amount <= 0) {
-    res.status(400).json({ error: "Invalid repayment amount" });
+    res.status(400).json({ error: "Montan pèman pa valid" });
     return;
   }
 
@@ -76,18 +76,18 @@ router.post("/:loanId/repay", requireAuth, async (req, res) => {
     .where(eq(loansTable.id, loanId));
 
   if (!loan || loan.userId !== user.id) {
-    res.status(404).json({ error: "Loan not found" });
+    res.status(404).json({ error: "Prè pa jwenn" });
     return;
   }
 
   if (loan.status !== "approved") {
-    res.status(400).json({ error: "Loan is not active" });
+    res.status(400).json({ error: "Prè a pa aktif" });
     return;
   }
 
   const [kane] = await db.select().from(kaneTable).where(eq(kaneTable.userId, user.id));
   if (!kane || parseFloat(kane.balance) < amount) {
-    res.status(400).json({ error: "Insufficient funds" });
+    res.status(400).json({ error: "Pa gen ase lajan" });
     return;
   }
 
