@@ -1,0 +1,224 @@
+[6/30, 4:13 PM] Pyram Sterling Community: Create a professional “Open Account (Kanè)” onboarding system for Pyram Sterling Bank.
+
+When a visitor clicks “Open an Account (Ouvè yon Kont)”, display a modern and professional account opening page.
+
+The registration form must collect the following information:
+
+* First Name
+* Last Name
+* Phone Number
+* Haitian National ID Number
+
+Display the account opening fee as:
+
+Account Opening Fee: 500 HTG
+
+Explain that:
+
+* 250 HTG is used to create the customer’s Bank Account (Kanè) and Pyram Sterling Bank Card.
+* 250 HTG is deposited into the customer’s new account as the initial balance after the account is approved and activated.
+
+Add a mandatory checkbox with the following text:
+
+“I agree to pay the 500 HTG account opening fee.”
+
+The applicant cannot continue unless the checkbox is selected.
+
+After completing the form, the applicant must schedule an appointment by selecting:
+
+* Appointment Date
+* Appointment Time
+
+When the form is submitted, the application must automatically appear in the Admin Dashboard with the status Pending Approval.
+
+The administrator must be able to:
+
+* View every application
+* Review the applicant’s information
+* Approve the application
+* Reject the application
+
+The account must NOT become active until:
+
+* The applicant appears at the bank.
+* The applicant’s identity is verified.
+* The applicant pays the 500 HTG account opening fee.
+
+After approval, the system must automatically generate:
+
+* A unique Bank Account Number (Kanè Number)
+* A unique Pyram Sterling Bank Virtual Card Number
+* A starting Credit Score
+* A Wallet linked to the account
+* An initial balance of 250 HTG
+
+Immediately after activation, the customer must be able to log into the application and see:
+
+* Their full name
+* Their Account Number
+* Their Virtual Card
+* Their Credit Score
+* Their available balance of 250 HTG
+* Their transaction history (empty if no transaction has been made yet)
+
+After the account is activated, automatically display a professional welcome message:
+
+“Congratulations! Your Pyram Sterling Bank account has been successfully activated. Welcome to Pyram Sterling Bank.”
+
+The system must also send this same welcome message as an in-app notification.
+
+The onboarding experience must look and behave like a real professional digital bank, with a secure, clean, modern, and user-friendly interface.
+[6/30, 4:13 PM] Pyram Sterling Community: After the administrator approves and activates a customer’s account, the application must automatically display an in-app notification on the customer’s dashboard.
+
+The notification should appear immediately after the customer logs in and should remain visible until the customer marks it as read.
+
+The notification should display the following message:
+
+🎉 Welcome to Pyram Sterling Bank!
+
+Congratulations! Your account has been successfully activated.
+
+Your account is now ready to use.
+
+Your account includes:
+
+* Your Bank Account (Kanè)
+* Your Pyram Sterling Bank Virtual Card
+* Your unique Account Number
+* Your starting Credit Score
+* Your initial balance of 250 HTG
+
+Thank you for choosing Pyram Sterling Bank.
+
+Add a notification icon (bell) at the top of the dashboard where customers can view all their notifications at any time.
+
+Unread notifications should display a red notification badge.
+[6/30, 5:04 PM] Pyram Sterling Community: Build a complete Loan Management Engine for Pyram Sterling Bank.
+
+When an administrator approves a loan, the system must automatically create a repayment schedule that includes:
+
+* Loan amount
+* Interest amount
+* Total repayment amount
+* Weekly payment amount
+* Payment due dates
+* Remaining balance
+* Loan status (Pending, Active, Paid, Late, Default)
+
+Every payment must automatically update:
+
+* Remaining loan balance
+* Repayment progress
+* Payment history
+* Loan status
+
+Create an automatic Credit Score Engine.
+
+Credit Score Rules
+
+* Every new customer starts with 300 points.
+* Every loan payment made on time: +5 points.
+* Successfully completing and fully repaying a loan: +30 points.
+* Every late payment: -30 points.
+* Failure to repay a loan (Loan Default): -100 points.
+* The Credit Score must never exceed 850 points.
+* The Credit Score must never go below 300 points.
+
+The Credit Score must automatically update after every payment or loan status change.
+
+Every Credit Score change must be recorded in the customer’s account history.
+
+Create a Loan Eligibility Engine.
+
+Before approving any new loan, the system must automatically evaluate:
+
+* Current Credit Score
+* Existing active loans
+* Complete repayment history
+* Account age
+* Number of previously completed loans
+
+Based on this evaluation, the system must automatically calculate and display:
+
+* Recommended maximum loan amount
+* Customer risk level
+* Loan eligibility status (Eligible or Not Eligible)
+
+The administrator should see these recommendations before making the final approval decision.
+
+The administrator always has the final authority to approve or reject the loan.
+
+The entire Loan Management, Credit Score, and Loan Eligibility system must operate automatically without requiring manual calculations from the administrator while maintaining accurate records of every loan, payment, and Credit Score update.
+[6/30, 5:08 PM] Pyram Sterling Community: Build Pyram Sterling Bank with an Offline-First architecture optimized for Haiti.
+
+The application must continue to provide a smooth experience even when the internet connection is slow, unstable, or temporarily unavailable.
+
+Requirements:
+
+* Minimize data usage throughout the application.
+* Load pages in less than a few seconds whenever possible.
+* Compress all images and optimize every asset.
+* Cache essential application data securely on the user’s device.
+* Automatically reconnect when the internet becomes available again.
+* Synchronize pending actions automatically after the connection is restored.
+
+When the internet connection is weak:
+
+* The application should continue displaying previously loaded information such as:
+    * Customer name
+    * Account number (Kanè)
+    * Virtual card
+    * Credit Score
+    * Last known account balance
+    * Recent transaction history
+    * Loan information
+
+The application must clearly indicate when displayed information is offline data and refresh it automatically once a connection is available.
+
+For security reasons, the following actions must always require an active internet connection:
+
+* Login
+* Money transfers
+* Loan applications
+* Loan approvals
+* Deposits
+* Withdrawals
+* Balance updates
+* Account modifications
+* Admin operations
+
+If a customer attempts one of these actions without internet, display a friendly message explaining that an internet connection is required.
+
+Optimize the application to work efficiently on:
+
+* 2G networks
+* 3G networks
+* Weak 4G connections
+* Low-end Android smartphones
+* Older mobile devices
+
+Prioritize reliability, speed, security, and low data consumption over unnecessary animations or heavy visual effects.
+
+The application should feel fast, lightweight, and dependable for customers in Haiti, even with poor network conditions.
+[6/30, 5:13 PM] Pyram Sterling Community: Add a Professional Network Status System to Pyram Sterling Bank.
+
+Display a network status indicator at the top of the application at all times.
+
+Network Status:
+
+🟢 Connected
+
+* The internet connection is stable.
+* All banking services are available.
+
+🟡 Weak Connection
+
+* The internet connection is slow or unstable.
+* Display the message:
+    “Your internet connection is weak. Some operations may take longer than usual.”
+* Continue loading lightweight data and keep the application responsive.
+
+🔴 Offline
+
+* Display the message:
+    “No internet connection. You can still view your previously loaded information, but banking transactions are temporarily unavailable.”

@@ -11,7 +11,7 @@ export const kaneTable = pgTable("kane", {
   cardExpiry: text("card_expiry").notNull(),
   cardCvv: text("card_cvv").notNull(),
   balance: numeric("balance", { precision: 15, scale: 2 }).notNull().default("0.00"),
-  creditScore: integer("credit_score").notNull().default(650),
+  creditScore: integer("credit_score").notNull().default(300),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

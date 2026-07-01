@@ -16,11 +16,13 @@ import SendPage from "@/pages/send";
 import LoansPage from "@/pages/loans";
 import PartnersPage from "@/pages/partners";
 import ProfilePage from "@/pages/profile";
+import ApplyPage from "@/pages/apply";
 import AdminDashboardPage from "@/pages/admin/index";
 import AdminUsersPage from "@/pages/admin/users";
 import AdminTransactionsPage from "@/pages/admin/transactions";
 import AdminLoansPage from "@/pages/admin/loans";
 import AdminPartnersPage from "@/pages/admin/partners";
+import AdminApplicationsPage from "@/pages/admin/applications";
 import NotFound from "@/pages/not-found";
 
 const clerkPubKey = publishableKeyFromHost(
@@ -153,8 +155,11 @@ function ClerkProviderWithRoutes() {
             <Route path="/partners">{() => <ProtectedRoute component={PartnersPage} />}</Route>
             <Route path="/profile">{() => <ProtectedRoute component={ProfilePage} />}</Route>
             
+            <Route path="/apply">{() => <ProtectedRoute component={ApplyPage} />}</Route>
+            
             <Route path="/admin">{() => <AdminRoute component={AdminDashboardPage} />}</Route>
             <Route path="/admin/users">{() => <AdminRoute component={AdminUsersPage} />}</Route>
+            <Route path="/admin/applications">{() => <AdminRoute component={AdminApplicationsPage} />}</Route>
             <Route path="/admin/transactions">{() => <AdminRoute component={AdminTransactionsPage} />}</Route>
             <Route path="/admin/loans">{() => <AdminRoute component={AdminLoansPage} />}</Route>
             <Route path="/admin/partners">{() => <AdminRoute component={AdminPartnersPage} />}</Route>

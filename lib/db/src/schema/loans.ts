@@ -3,7 +3,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./users";
 
-export const loanStatusEnum = pgEnum("loan_status", ["pending", "approved", "rejected", "repaid"]);
+export const loanStatusEnum = pgEnum("loan_status", ["pending", "approved", "rejected", "repaid", "late", "defaulted"]);
 
 export const loansTable = pgTable("loans", {
   id: serial("id").primaryKey(),
@@ -12,6 +12,12 @@ export const loansTable = pgTable("loans", {
   purpose: text("purpose").notNull(),
   status: loanStatusEnum("status").notNull().default("pending"),
   amountRepaid: numeric("amount_repaid", { precision: 15, scale: 2 }).notNull().default("0.00"),
+  interestRate: numeric("interest_rate", { precision: 5, scale: 4 }).notNull().default("0.05"),
+  totalRepaymentAmount: numeric("total_repayment_amount", { precision: 15, scale: 2 }),
+  weeklyPaymentAmount: numeric("weekly_payment_amount", { precision: 15, scale: 2 }),
+  durationWeeks: integer("duration_weeks").notNull().default(12),
+  nextPaymentDue: timestamp("next_payment_due", { withTimezone: true }),
+  latePayments: integer("late_payments").notNull().default(0),
   approvedAt: timestamp("approved_at", { withTimezone: true }),
   rejectedAt: timestamp("rejected_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

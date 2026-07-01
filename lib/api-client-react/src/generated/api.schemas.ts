@@ -119,7 +119,16 @@ export const LoanStatus = {
   approved: 'approved',
   rejected: 'rejected',
   repaid: 'repaid',
+  late: 'late',
+  defaulted: 'defaulted',
 } as const;
+
+export interface LoanEligibility {
+  eligible?: boolean;
+  maxAmount?: number;
+  riskLevel?: string;
+  reason?: string;
+}
 
 export interface Loan {
   id: number;
@@ -128,6 +137,15 @@ export interface Loan {
   purpose: string;
   status: LoanStatus;
   amountRepaid: number;
+  interestRate: number;
+  /** @nullable */
+  totalRepaymentAmount?: number | null;
+  /** @nullable */
+  weeklyPaymentAmount?: number | null;
+  durationWeeks: number;
+  /** @nullable */
+  nextPaymentDue?: string | null;
+  latePayments: number;
   /** @nullable */
   approvedAt?: string | null;
   /** @nullable */
@@ -137,6 +155,7 @@ export interface Loan {
   userName?: string | null;
   /** @nullable */
   userEmail?: string | null;
+  eligibility?: LoanEligibility;
 }
 
 export interface LoanRequest {
@@ -215,6 +234,7 @@ export interface AdminStats {
   activeLoans: number;
   totalLoansIssued: number;
   totalPartnersApproved: number;
+  pendingApplications: number;
 }
 
 export interface CreditScoreUpdate {
@@ -223,6 +243,58 @@ export interface CreditScoreUpdate {
      * @maximum 850
      */
   creditScore: number;
+}
+
+export type ApplicationStatus = typeof ApplicationStatus[keyof typeof ApplicationStatus];
+
+
+export const ApplicationStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface Application {
+  id: number;
+  /** @nullable */
+  userId?: number | null;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  nationalId: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  status: ApplicationStatus;
+  /** @nullable */
+  notes?: string | null;
+  createdAt: string;
+  /** @nullable */
+  approvedAt?: string | null;
+  /** @nullable */
+  rejectedAt?: string | null;
+}
+
+export interface ApplicationInput {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  nationalId: string;
+  appointmentDate: string;
+  appointmentTime: string;
+}
+
+export interface ApplicationDecision {
+  notes?: string;
+}
+
+export interface Notification {
+  id: number;
+  userId: number;
+  title: string;
+  message: string;
+  isRead: boolean;
+  type: string;
+  createdAt: string;
 }
 
 export type ListTransactionsParams = {
@@ -262,4 +334,8 @@ export const AdminListLoansStatus = {
   rejected: 'rejected',
   repaid: 'repaid',
 } as const;
+
+export type MarkAllNotificationsRead200 = {
+  success?: boolean;
+};
 

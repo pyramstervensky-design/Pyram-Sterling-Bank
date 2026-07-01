@@ -6,14 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type LoanStatus = typeof LoanStatus[keyof typeof LoanStatus];
+export type ApplicationStatus = typeof ApplicationStatus[keyof typeof ApplicationStatus];
 
 
-export const LoanStatus = {
+export const ApplicationStatus = {
   pending: 'pending',
   approved: 'approved',
   rejected: 'rejected',
-  repaid: 'repaid',
-  late: 'late',
-  defaulted: 'defaulted',
 } as const;

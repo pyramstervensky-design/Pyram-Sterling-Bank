@@ -1,0 +1,70 @@
+Create a professional “Open Account (Kanè)” onboarding system for Pyram Sterling Bank.
+
+When a visitor clicks “Open an Account (Ouvè yon Kont)”, display a modern and professional account opening page.
+
+The registration form must collect the following information:
+
+* First Name
+* Last Name
+* Phone Number
+* Haitian National ID Number
+
+Display the account opening fee as:
+
+Account Opening Fee: 500 HTG
+
+Explain that:
+
+* 250 HTG is used to create the customer’s Bank Account (Kanè) and Pyram Sterling Bank Card.
+* 250 HTG is deposited into the customer’s new account as the initial balance after the account is approved and activated.
+
+Add a mandatory checkbox with the following text:
+
+“I agree to pay the 500 HTG account opening fee.”
+
+The applicant cannot continue unless the checkbox is selected.
+
+After completing the form, the applicant must schedule an appointment by selecting:
+
+* Appointment Date
+* Appointment Time
+
+When the form is submitted, the application must automatically appear in the Admin Dashboard with the status Pending Approval.
+
+The administrator must be able to:
+
+* View every application
+* Review the applicant’s information
+* Approve the application
+* Reject the application
+
+The account must NOT become active until:
+
+* The applicant appears at the bank.
+* The applicant’s identity is verified.
+* The applicant pays the 500 HTG account opening fee.
+
+After approval, the system must automatically generate:
+
+* A unique Bank Account Number (Kanè Number)
+* A unique Pyram Sterling Bank Virtual Card Number
+* A starting Credit Score
+* A Wallet linked to the account
+* An initial balance of 250 HTG
+
+Immediately after activation, the customer must be able to log into the application and see:
+
+* Their full name
+* Their Account Number
+* Their Virtual Card
+* Their Credit Score
+* Their available balance of 250 HTG
+* Their transaction history (empty if no transaction has been made yet)
+
+After the account is activated, automatically display a professional welcome message:
+
+“Congratulations! Your Pyram Sterling Bank account has been successfully activated. Welcome to Pyram Sterling Bank.”
+
+The system must also send this same welcome message as an in-app notification.
+
+The onboarding experience must look and behave like a real professional digital bank, with a secure, clean, modern, and user-friendly interface.

@@ -5,6 +5,7 @@
  * Pyram Sterling Bank API
  * OpenAPI spec version: 0.1.0
  */
+import type { LoanEligibility } from './loanEligibility';
 import type { LoanStatus } from './loanStatus';
 
 export interface Loan {
@@ -14,6 +15,15 @@ export interface Loan {
   purpose: string;
   status: LoanStatus;
   amountRepaid: number;
+  interestRate: number;
+  /** @nullable */
+  totalRepaymentAmount?: number | null;
+  /** @nullable */
+  weeklyPaymentAmount?: number | null;
+  durationWeeks: number;
+  /** @nullable */
+  nextPaymentDue?: string | null;
+  latePayments: number;
   /** @nullable */
   approvedAt?: string | null;
   /** @nullable */
@@ -23,4 +33,5 @@ export interface Loan {
   userName?: string | null;
   /** @nullable */
   userEmail?: string | null;
+  eligibility?: LoanEligibility;
 }

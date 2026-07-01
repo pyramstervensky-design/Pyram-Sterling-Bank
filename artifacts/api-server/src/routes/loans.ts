@@ -1,5 +1,5 @@
 import { Router, type Request } from "express";
-import { db, usersTable, kaneTable, loansTable, transactionsTable } from "@workspace/db";
+import { db, usersTable, kaneTable, loansTable, transactionsTable, creditScoreHistoryTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { requireAuth } from "../lib/auth";
 
@@ -15,12 +15,22 @@ function formatLoan(l: typeof loansTable.$inferSelect, u?: typeof usersTable.$in
     purpose: l.purpose,
     status: l.status,
     amountRepaid: parseFloat(l.amountRepaid),
+    interestRate: parseFloat(l.interestRate),
+    totalRepaymentAmount: l.totalRepaymentAmount ? parseFloat(l.totalRepaymentAmount) : null,
+    weeklyPaymentAmount: l.weeklyPaymentAmount ? parseFloat(l.weeklyPaymentAmount) : null,
+    durationWeeks: l.durationWeeks,
+    nextPaymentDue: l.nextPaymentDue?.toISOString() ?? null,
+    latePayments: l.latePayments,
     approvedAt: l.approvedAt?.toISOString() ?? null,
     rejectedAt: l.rejectedAt?.toISOString() ?? null,
     createdAt: l.createdAt.toISOString(),
     userName: u ? `${u.firstName} ${u.lastName}` : null,
     userEmail: u?.email ?? null,
   };
+}
+
+function clampScore(score: number): number {
+  return Math.max(300, Math.min(850, score));
 }
 
 router.get("/", requireAuth, async (req, res) => {
@@ -43,6 +53,12 @@ router.post("/", requireAuth, async (req, res) => {
   }
   if (!purpose || purpose.length < 5) {
     res.status(400).json({ error: "Bi a dwe gen omwen 5 karaktè" });
+    return;
+  }
+
+  const [kane] = await db.select().from(kaneTable).where(eq(kaneTable.userId, user.id));
+  if (!kane) {
+    res.status(403).json({ error: "Kont Kanè pa jwenn. Ou bezwen aplike pou yon kont dabò." });
     return;
   }
 
@@ -70,17 +86,13 @@ router.post("/:loanId/repay", requireAuth, async (req, res) => {
     return;
   }
 
-  const [loan] = await db
-    .select()
-    .from(loansTable)
-    .where(eq(loansTable.id, loanId));
-
+  const [loan] = await db.select().from(loansTable).where(eq(loansTable.id, loanId));
   if (!loan || loan.userId !== user.id) {
     res.status(404).json({ error: "Prè pa jwenn" });
     return;
   }
 
-  if (loan.status !== "approved") {
+  if (loan.status !== "approved" && loan.status !== "late") {
     res.status(400).json({ error: "Prè a pa aktif" });
     return;
   }
@@ -91,29 +103,63 @@ router.post("/:loanId/repay", requireAuth, async (req, res) => {
     return;
   }
 
+  const now = new Date();
+  const isLate = loan.nextPaymentDue != null && now > loan.nextPaymentDue;
+
+  const totalRepayment = loan.totalRepaymentAmount
+    ? parseFloat(loan.totalRepaymentAmount)
+    : parseFloat(loan.amount);
   const newAmountRepaid = parseFloat(loan.amountRepaid) + amount;
-  const loanAmount = parseFloat(loan.amount);
-  const newStatus = newAmountRepaid >= loanAmount ? "repaid" : "approved";
+  const isFullyRepaid = newAmountRepaid >= totalRepayment;
+
+  let scoreChange = isLate ? -30 : 5;
+  let scoreReason = isLate ? "Pèman an reta pou prè #" + loanId : "Pèman nan tan pou prè #" + loanId;
+  if (isFullyRepaid) {
+    scoreChange += 30;
+    scoreReason = "Prè #" + loanId + " ranmase konplètman";
+  }
+
+  const prevScore = kane.creditScore;
+  const newScore = clampScore(prevScore + scoreChange);
+
+  await db.insert(creditScoreHistoryTable).values({
+    userId: user.id,
+    previousScore: prevScore,
+    newScore,
+    change: newScore - prevScore,
+    reason: scoreReason,
+  });
+
+  await db
+    .update(kaneTable)
+    .set({
+      balance: String((parseFloat(kane.balance) - amount).toFixed(2)),
+      creditScore: newScore,
+    })
+    .where(eq(kaneTable.userId, user.id));
+
+  const nextDue = loan.nextPaymentDue
+    ? new Date(loan.nextPaymentDue.getTime() + 7 * 24 * 60 * 60 * 1000)
+    : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+  const newStatus = isFullyRepaid ? "repaid" : isLate ? "late" : "approved";
 
   const [updatedLoan] = await db
     .update(loansTable)
     .set({
       amountRepaid: String(newAmountRepaid.toFixed(2)),
       status: newStatus,
+      latePayments: isLate ? loan.latePayments + 1 : loan.latePayments,
+      nextPaymentDue: isFullyRepaid ? null : nextDue,
     })
     .where(eq(loansTable.id, loanId))
     .returning();
-
-  await db
-    .update(kaneTable)
-    .set({ balance: String((parseFloat(kane.balance) - amount).toFixed(2)) })
-    .where(eq(kaneTable.userId, user.id));
 
   await db.insert(transactionsTable).values({
     userId: user.id,
     type: "loan_repayment",
     amount: String(amount.toFixed(2)),
-    description: `Loan repayment for loan #${loanId}`,
+    description: `Ranbousman prè #${loanId}`,
     status: "completed",
   });
 

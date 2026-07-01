@@ -27,10 +27,12 @@ function generateCvv(): string {
   return String(Math.floor(Math.random() * 900) + 100);
 }
 
+export { generateAccountNumber, generateCardNumber, generateCardExpiry, generateCvv };
+
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const { userId } = getAuth(req);
   if (!userId) {
-    res.status(401).json({ error: "Unauthorized" });
+    res.status(401).json({ error: "Non otorize" });
     return;
   }
 
@@ -51,17 +53,20 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       .returning();
     user = newUser;
 
-    const accountNumber = generateAccountNumber();
-    const cardNumber = generateCardNumber();
-    await db.insert(kaneTable).values({
-      userId: user.id,
-      accountNumber,
-      cardNumber,
-      cardExpiry: generateCardExpiry(),
-      cardCvv: generateCvv(),
-      balance: "1000.00",
-      creditScore: 650,
-    });
+    // Admin (first user) gets Kanè immediately. Regular users apply first.
+    if (isFirstUser) {
+      const accountNumber = generateAccountNumber();
+      const cardNumber = generateCardNumber();
+      await db.insert(kaneTable).values({
+        userId: user.id,
+        accountNumber,
+        cardNumber,
+        cardExpiry: generateCardExpiry(),
+        cardCvv: generateCvv(),
+        balance: "250.00",
+        creditScore: 300,
+      });
+    }
   } else {
     const updates: Record<string, unknown> = {};
     if (email && email !== user.email) updates.email = email;
@@ -80,7 +85,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 export async function requireAdmin(req: Request, res: Response, next: NextFunction) {
   const dbUser = (req as Request & { dbUser: { role: string } }).dbUser;
   if (!dbUser || dbUser.role !== "admin") {
-    res.status(403).json({ error: "Forbidden: Admin access required" });
+    res.status(403).json({ error: "Entèdi: Aksè admin obligatwa" });
     return;
   }
   next();

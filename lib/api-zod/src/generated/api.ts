@@ -194,13 +194,25 @@ export const ListMyLoansResponseItem = zod.object({
   "userId": zod.number(),
   "amount": zod.number(),
   "purpose": zod.string(),
-  "status": zod.enum(['pending', 'approved', 'rejected', 'repaid']),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'repaid', 'late', 'defaulted']),
   "amountRepaid": zod.number(),
+  "interestRate": zod.number(),
+  "totalRepaymentAmount": zod.number().nullish(),
+  "weeklyPaymentAmount": zod.number().nullish(),
+  "durationWeeks": zod.number(),
+  "nextPaymentDue": zod.string().nullish(),
+  "latePayments": zod.number(),
   "approvedAt": zod.string().nullish(),
   "rejectedAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "userName": zod.string().nullish(),
-  "userEmail": zod.string().nullish()
+  "userEmail": zod.string().nullish(),
+  "eligibility": zod.object({
+  "eligible": zod.boolean().optional(),
+  "maxAmount": zod.number().optional(),
+  "riskLevel": zod.string().optional(),
+  "reason": zod.string().optional()
+}).optional()
 })
 export const ListMyLoansResponse = zod.array(ListMyLoansResponseItem)
 
@@ -224,13 +236,25 @@ export const RequestLoanResponse = zod.object({
   "userId": zod.number(),
   "amount": zod.number(),
   "purpose": zod.string(),
-  "status": zod.enum(['pending', 'approved', 'rejected', 'repaid']),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'repaid', 'late', 'defaulted']),
   "amountRepaid": zod.number(),
+  "interestRate": zod.number(),
+  "totalRepaymentAmount": zod.number().nullish(),
+  "weeklyPaymentAmount": zod.number().nullish(),
+  "durationWeeks": zod.number(),
+  "nextPaymentDue": zod.string().nullish(),
+  "latePayments": zod.number(),
   "approvedAt": zod.string().nullish(),
   "rejectedAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "userName": zod.string().nullish(),
-  "userEmail": zod.string().nullish()
+  "userEmail": zod.string().nullish(),
+  "eligibility": zod.object({
+  "eligible": zod.boolean().optional(),
+  "maxAmount": zod.number().optional(),
+  "riskLevel": zod.string().optional(),
+  "reason": zod.string().optional()
+}).optional()
 })
 
 
@@ -254,13 +278,25 @@ export const RepayLoanResponse = zod.object({
   "userId": zod.number(),
   "amount": zod.number(),
   "purpose": zod.string(),
-  "status": zod.enum(['pending', 'approved', 'rejected', 'repaid']),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'repaid', 'late', 'defaulted']),
   "amountRepaid": zod.number(),
+  "interestRate": zod.number(),
+  "totalRepaymentAmount": zod.number().nullish(),
+  "weeklyPaymentAmount": zod.number().nullish(),
+  "durationWeeks": zod.number(),
+  "nextPaymentDue": zod.string().nullish(),
+  "latePayments": zod.number(),
   "approvedAt": zod.string().nullish(),
   "rejectedAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "userName": zod.string().nullish(),
-  "userEmail": zod.string().nullish()
+  "userEmail": zod.string().nullish(),
+  "eligibility": zod.object({
+  "eligible": zod.boolean().optional(),
+  "maxAmount": zod.number().optional(),
+  "riskLevel": zod.string().optional(),
+  "reason": zod.string().optional()
+}).optional()
 })
 
 
@@ -380,13 +416,25 @@ export const AdminListUsersResponseItem = zod.object({
   "userId": zod.number(),
   "amount": zod.number(),
   "purpose": zod.string(),
-  "status": zod.enum(['pending', 'approved', 'rejected', 'repaid']),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'repaid', 'late', 'defaulted']),
   "amountRepaid": zod.number(),
+  "interestRate": zod.number(),
+  "totalRepaymentAmount": zod.number().nullish(),
+  "weeklyPaymentAmount": zod.number().nullish(),
+  "durationWeeks": zod.number(),
+  "nextPaymentDue": zod.string().nullish(),
+  "latePayments": zod.number(),
   "approvedAt": zod.string().nullish(),
   "rejectedAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "userName": zod.string().nullish(),
-  "userEmail": zod.string().nullish()
+  "userEmail": zod.string().nullish(),
+  "eligibility": zod.object({
+  "eligible": zod.boolean().optional(),
+  "maxAmount": zod.number().optional(),
+  "riskLevel": zod.string().optional(),
+  "reason": zod.string().optional()
+}).optional()
 })).optional()
 })
 export const AdminListUsersResponse = zod.array(AdminListUsersResponseItem)
@@ -423,13 +471,25 @@ export const AdminGetUserResponse = zod.object({
   "userId": zod.number(),
   "amount": zod.number(),
   "purpose": zod.string(),
-  "status": zod.enum(['pending', 'approved', 'rejected', 'repaid']),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'repaid', 'late', 'defaulted']),
   "amountRepaid": zod.number(),
+  "interestRate": zod.number(),
+  "totalRepaymentAmount": zod.number().nullish(),
+  "weeklyPaymentAmount": zod.number().nullish(),
+  "durationWeeks": zod.number(),
+  "nextPaymentDue": zod.string().nullish(),
+  "latePayments": zod.number(),
   "approvedAt": zod.string().nullish(),
   "rejectedAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "userName": zod.string().nullish(),
-  "userEmail": zod.string().nullish()
+  "userEmail": zod.string().nullish(),
+  "eligibility": zod.object({
+  "eligible": zod.boolean().optional(),
+  "maxAmount": zod.number().optional(),
+  "riskLevel": zod.string().optional(),
+  "reason": zod.string().optional()
+}).optional()
 })).optional()
 })
 
@@ -473,13 +533,25 @@ export const AdminListLoansResponseItem = zod.object({
   "userId": zod.number(),
   "amount": zod.number(),
   "purpose": zod.string(),
-  "status": zod.enum(['pending', 'approved', 'rejected', 'repaid']),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'repaid', 'late', 'defaulted']),
   "amountRepaid": zod.number(),
+  "interestRate": zod.number(),
+  "totalRepaymentAmount": zod.number().nullish(),
+  "weeklyPaymentAmount": zod.number().nullish(),
+  "durationWeeks": zod.number(),
+  "nextPaymentDue": zod.string().nullish(),
+  "latePayments": zod.number(),
   "approvedAt": zod.string().nullish(),
   "rejectedAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "userName": zod.string().nullish(),
-  "userEmail": zod.string().nullish()
+  "userEmail": zod.string().nullish(),
+  "eligibility": zod.object({
+  "eligible": zod.boolean().optional(),
+  "maxAmount": zod.number().optional(),
+  "riskLevel": zod.string().optional(),
+  "reason": zod.string().optional()
+}).optional()
 })
 export const AdminListLoansResponse = zod.array(AdminListLoansResponseItem)
 
@@ -496,13 +568,25 @@ export const AdminApproveLoanResponse = zod.object({
   "userId": zod.number(),
   "amount": zod.number(),
   "purpose": zod.string(),
-  "status": zod.enum(['pending', 'approved', 'rejected', 'repaid']),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'repaid', 'late', 'defaulted']),
   "amountRepaid": zod.number(),
+  "interestRate": zod.number(),
+  "totalRepaymentAmount": zod.number().nullish(),
+  "weeklyPaymentAmount": zod.number().nullish(),
+  "durationWeeks": zod.number(),
+  "nextPaymentDue": zod.string().nullish(),
+  "latePayments": zod.number(),
   "approvedAt": zod.string().nullish(),
   "rejectedAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "userName": zod.string().nullish(),
-  "userEmail": zod.string().nullish()
+  "userEmail": zod.string().nullish(),
+  "eligibility": zod.object({
+  "eligible": zod.boolean().optional(),
+  "maxAmount": zod.number().optional(),
+  "riskLevel": zod.string().optional(),
+  "reason": zod.string().optional()
+}).optional()
 })
 
 
@@ -518,13 +602,25 @@ export const AdminRejectLoanResponse = zod.object({
   "userId": zod.number(),
   "amount": zod.number(),
   "purpose": zod.string(),
-  "status": zod.enum(['pending', 'approved', 'rejected', 'repaid']),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'repaid', 'late', 'defaulted']),
   "amountRepaid": zod.number(),
+  "interestRate": zod.number(),
+  "totalRepaymentAmount": zod.number().nullish(),
+  "weeklyPaymentAmount": zod.number().nullish(),
+  "durationWeeks": zod.number(),
+  "nextPaymentDue": zod.string().nullish(),
+  "latePayments": zod.number(),
   "approvedAt": zod.string().nullish(),
   "rejectedAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "userName": zod.string().nullish(),
-  "userEmail": zod.string().nullish()
+  "userEmail": zod.string().nullish(),
+  "eligibility": zod.object({
+  "eligible": zod.boolean().optional(),
+  "maxAmount": zod.number().optional(),
+  "riskLevel": zod.string().optional(),
+  "reason": zod.string().optional()
+}).optional()
 })
 
 
@@ -578,7 +674,8 @@ export const AdminGetStatsResponse = zod.object({
   "pendingLoans": zod.number(),
   "activeLoans": zod.number(),
   "totalLoansIssued": zod.number(),
-  "totalPartnersApproved": zod.number()
+  "totalPartnersApproved": zod.number(),
+  "pendingApplications": zod.number()
 })
 
 
@@ -608,6 +705,173 @@ export const AdminUpdateCreditScoreResponse = zod.object({
   "balance": zod.number(),
   "creditScore": zod.number(),
   "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Admin — list all account applications
+ */
+export const AdminListApplicationsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number().nullish(),
+  "firstName": zod.string(),
+  "lastName": zod.string(),
+  "phone": zod.string(),
+  "nationalId": zod.string(),
+  "appointmentDate": zod.string(),
+  "appointmentTime": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "approvedAt": zod.string().nullish(),
+  "rejectedAt": zod.string().nullish()
+})
+export const AdminListApplicationsResponse = zod.array(AdminListApplicationsResponseItem)
+
+
+/**
+ * @summary Admin — approve an account application (creates Kanè)
+ */
+export const AdminApproveApplicationParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminApproveApplicationBody = zod.object({
+  "notes": zod.string().optional()
+})
+
+export const AdminApproveApplicationResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number().nullish(),
+  "firstName": zod.string(),
+  "lastName": zod.string(),
+  "phone": zod.string(),
+  "nationalId": zod.string(),
+  "appointmentDate": zod.string(),
+  "appointmentTime": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "approvedAt": zod.string().nullish(),
+  "rejectedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Admin — reject an account application
+ */
+export const AdminRejectApplicationParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminRejectApplicationBody = zod.object({
+  "notes": zod.string().optional()
+})
+
+export const AdminRejectApplicationResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number().nullish(),
+  "firstName": zod.string(),
+  "lastName": zod.string(),
+  "phone": zod.string(),
+  "nationalId": zod.string(),
+  "appointmentDate": zod.string(),
+  "appointmentTime": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "approvedAt": zod.string().nullish(),
+  "rejectedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Submit an account opening application
+ */
+export const SubmitApplicationBody = zod.object({
+  "firstName": zod.string(),
+  "lastName": zod.string(),
+  "phone": zod.string(),
+  "nationalId": zod.string(),
+  "appointmentDate": zod.string(),
+  "appointmentTime": zod.string()
+})
+
+export const SubmitApplicationResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number().nullish(),
+  "firstName": zod.string(),
+  "lastName": zod.string(),
+  "phone": zod.string(),
+  "nationalId": zod.string(),
+  "appointmentDate": zod.string(),
+  "appointmentTime": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "approvedAt": zod.string().nullish(),
+  "rejectedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get my current application status
+ */
+export const GetMyApplicationResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number().nullish(),
+  "firstName": zod.string(),
+  "lastName": zod.string(),
+  "phone": zod.string(),
+  "nationalId": zod.string(),
+  "appointmentDate": zod.string(),
+  "appointmentTime": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "approvedAt": zod.string().nullish(),
+  "rejectedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get my notifications
+ */
+export const ListNotificationsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "title": zod.string(),
+  "message": zod.string(),
+  "isRead": zod.boolean(),
+  "type": zod.string(),
+  "createdAt": zod.string()
+})
+export const ListNotificationsResponse = zod.array(ListNotificationsResponseItem)
+
+
+/**
+ * @summary Mark a notification as read
+ */
+export const MarkNotificationReadParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const MarkNotificationReadResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "title": zod.string(),
+  "message": zod.string(),
+  "isRead": zod.boolean(),
+  "type": zod.string(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Mark all notifications as read
+ */
+export const MarkAllNotificationsReadResponse = zod.object({
+  "success": zod.boolean().optional()
 })
 
 

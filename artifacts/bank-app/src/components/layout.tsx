@@ -1,8 +1,10 @@
 import { Link, useLocation } from "wouter";
 import { useUser, useClerk, Show } from "@clerk/react";
 import { useGetMe } from "@workspace/api-client-react";
-import { Home, ArrowRightLeft, Send, Landmark, Users, Settings, LogOut, ShieldAlert } from "lucide-react";
+import { Home, ArrowRightLeft, Send, Landmark, Users, Settings, LogOut, ShieldAlert, FileText } from "lucide-react";
 import { Button } from "./ui/button";
+import { NotificationsBell } from "./notifications-bell";
+import { NetworkStatusIndicator, NetworkStatusBanner } from "./network-status";
 
 function NavLink({ href, icon: Icon, children }: { href: string; icon: any; children: React.ReactNode }) {
   const [location] = useLocation();
@@ -51,6 +53,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-8 px-3">Admin</div>
               <NavLink href="/admin" icon={ShieldAlert}>Apersi</NavLink>
               <NavLink href="/admin/users" icon={Users}>Itilizatè</NavLink>
+              <NavLink href="/admin/applications" icon={FileText}>Aplikasyon</NavLink>
               <NavLink href="/admin/transactions" icon={ArrowRightLeft}>Tout Tranzaksyon</NavLink>
               <NavLink href="/admin/loans" icon={Landmark}>Apwobasyon Prè</NavLink>
               <NavLink href="/admin/partners" icon={Users}>Jere Patnè</NavLink>
@@ -71,13 +74,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Kontni Prensipal */}
-      <main className="flex-1 overflow-y-auto bg-slate-50">
-        <header className="h-16 border-b bg-white flex items-center justify-between px-8 sticky top-0 z-10">
-          <h2 className="font-serif text-xl text-slate-900">
-            {isAdmin ? <span className="bg-amber-100 text-amber-800 text-xs font-sans px-2 py-1 rounded mr-3 align-middle tracking-wider font-bold">ADMIN</span> : null}
-            Pyram Sterling Bank
-          </h2>
+      <main className="flex-1 overflow-y-auto bg-slate-50 flex flex-col">
+        <header className="h-16 border-b bg-white flex items-center justify-between px-8 sticky top-0 z-10 flex-shrink-0">
           <div className="flex items-center gap-4">
+            <h2 className="font-serif text-xl text-slate-900">
+              {isAdmin ? <span className="bg-amber-100 text-amber-800 text-xs font-sans px-2 py-1 rounded mr-3 align-middle tracking-wider font-bold">ADMIN</span> : null}
+              Pyram Sterling Bank
+            </h2>
+            <NetworkStatusIndicator />
+          </div>
+          <div className="flex items-center gap-3">
+            <NotificationsBell />
             <div className="text-right hidden sm:block">
               <p className="text-sm font-medium text-slate-900">{profile?.firstName} {profile?.lastName}</p>
               <p className="text-xs text-slate-500">{user?.emailAddresses[0]?.emailAddress}</p>
@@ -87,7 +94,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </header>
-        <div className="p-8 max-w-7xl mx-auto">
+        <NetworkStatusBanner />
+        <div className="p-8 max-w-7xl mx-auto w-full flex-1">
           {children}
         </div>
       </main>

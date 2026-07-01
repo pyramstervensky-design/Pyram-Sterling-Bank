@@ -1,44 +1,41 @@
 import { Router, type Request } from "express";
-import { db, usersTable, kaneTable, loansTable, transactionsTable, partnersTable } from "@workspace/db";
+import {
+  db, usersTable, kaneTable, loansTable, transactionsTable, partnersTable,
+  accountApplicationsTable, notificationsTable, creditScoreHistoryTable,
+} from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
-import { requireAuth, requireAdmin } from "../lib/auth";
+import { requireAuth, requireAdmin, generateAccountNumber, generateCardNumber, generateCardExpiry, generateCvv } from "../lib/auth";
 
 const router = Router();
 
 function formatUser(u: typeof usersTable.$inferSelect) {
   return {
-    id: u.id,
-    clerkId: u.clerkId,
-    email: u.email,
-    firstName: u.firstName,
-    lastName: u.lastName,
-    role: u.role,
+    id: u.id, clerkId: u.clerkId, email: u.email,
+    firstName: u.firstName, lastName: u.lastName, role: u.role,
     createdAt: u.createdAt.toISOString(),
   };
 }
 
 function formatKane(k: typeof kaneTable.$inferSelect) {
   return {
-    id: k.id,
-    userId: k.userId,
-    accountNumber: k.accountNumber,
-    cardNumber: k.cardNumber,
-    cardExpiry: k.cardExpiry,
-    cardCvv: k.cardCvv,
-    balance: parseFloat(k.balance),
-    creditScore: k.creditScore,
+    id: k.id, userId: k.userId, accountNumber: k.accountNumber,
+    cardNumber: k.cardNumber, cardExpiry: k.cardExpiry, cardCvv: k.cardCvv,
+    balance: parseFloat(k.balance), creditScore: k.creditScore,
     createdAt: k.createdAt.toISOString(),
   };
 }
 
 function formatLoan(l: typeof loansTable.$inferSelect, u?: typeof usersTable.$inferSelect) {
   return {
-    id: l.id,
-    userId: l.userId,
-    amount: parseFloat(l.amount),
-    purpose: l.purpose,
-    status: l.status,
+    id: l.id, userId: l.userId,
+    amount: parseFloat(l.amount), purpose: l.purpose, status: l.status,
     amountRepaid: parseFloat(l.amountRepaid),
+    interestRate: parseFloat(l.interestRate),
+    totalRepaymentAmount: l.totalRepaymentAmount ? parseFloat(l.totalRepaymentAmount) : null,
+    weeklyPaymentAmount: l.weeklyPaymentAmount ? parseFloat(l.weeklyPaymentAmount) : null,
+    durationWeeks: l.durationWeeks,
+    nextPaymentDue: l.nextPaymentDue?.toISOString() ?? null,
+    latePayments: l.latePayments,
     approvedAt: l.approvedAt?.toISOString() ?? null,
     rejectedAt: l.rejectedAt?.toISOString() ?? null,
     createdAt: l.createdAt.toISOString(),
@@ -49,29 +46,174 @@ function formatLoan(l: typeof loansTable.$inferSelect, u?: typeof usersTable.$in
 
 function formatPartner(p: typeof partnersTable.$inferSelect, accountNumber?: string | null) {
   return {
-    id: p.id,
-    userId: p.userId,
-    businessName: p.businessName,
-    businessType: p.businessType,
-    description: p.description ?? null,
-    status: p.status,
+    id: p.id, userId: p.userId, businessName: p.businessName, businessType: p.businessType,
+    description: p.description ?? null, status: p.status,
     onboardingFee: parseFloat(p.onboardingFee),
-    createdAt: p.createdAt.toISOString(),
-    accountNumber: accountNumber ?? null,
+    createdAt: p.createdAt.toISOString(), accountNumber: accountNumber ?? null,
   };
 }
 
+function formatApplication(a: typeof accountApplicationsTable.$inferSelect) {
+  return {
+    id: a.id, userId: a.userId ?? null,
+    firstName: a.firstName, lastName: a.lastName, phone: a.phone, nationalId: a.nationalId,
+    appointmentDate: a.appointmentDate, appointmentTime: a.appointmentTime,
+    status: a.status, notes: a.notes ?? null,
+    createdAt: a.createdAt.toISOString(),
+    approvedAt: a.approvedAt?.toISOString() ?? null,
+    rejectedAt: a.rejectedAt?.toISOString() ?? null,
+  };
+}
+
+function getLoanEligibility(creditScore: number, activeLoansCount: number) {
+  if (activeLoansCount > 0) {
+    return { eligible: false, maxAmount: 0, riskLevel: "Prè aktif egziste", reason: "Kliyan an gen yon prè aktif" };
+  }
+  if (creditScore < 500) {
+    return { eligible: false, maxAmount: 0, riskLevel: "Twò wo", reason: "Pwen kredi twò ba (< 500)" };
+  }
+  if (creditScore < 600) {
+    return { eligible: true, maxAmount: 5000, riskLevel: "Wo", reason: "Pwen kredi ba (500-599)" };
+  }
+  if (creditScore < 700) {
+    return { eligible: true, maxAmount: 15000, riskLevel: "Mwayen", reason: "Pwen kredi mwayen (600-699)" };
+  }
+  if (creditScore < 750) {
+    return { eligible: true, maxAmount: 30000, riskLevel: "Ba", reason: "Bon pwen kredi (700-749)" };
+  }
+  return { eligible: true, maxAmount: 50000, riskLevel: "Trè ba", reason: "Ekselan pwen kredi (750+)" };
+}
+
 router.use(requireAuth, requireAdmin);
+
+// ── Applications ─────────────────────────────────────────────────────────────
+
+router.get("/applications", async (_req, res) => {
+  const apps = await db
+    .select()
+    .from(accountApplicationsTable)
+    .orderBy(desc(accountApplicationsTable.createdAt));
+
+  const results = await Promise.all(
+    apps.map(async (a) => {
+      let userInfo = null;
+      if (a.userId) {
+        const [u] = await db.select().from(usersTable).where(eq(usersTable.id, a.userId));
+        if (u) userInfo = { email: u.email, clerkId: u.clerkId };
+      }
+      return { ...formatApplication(a), userInfo };
+    })
+  );
+
+  res.json(results);
+});
+
+router.post("/applications/:id/approve", async (req, res) => {
+  const appId = parseInt(req.params.id);
+  const { notes } = req.body as { notes?: string };
+
+  const [app] = await db
+    .select()
+    .from(accountApplicationsTable)
+    .where(eq(accountApplicationsTable.id, appId));
+
+  if (!app) {
+    res.status(404).json({ error: "Aplikasyon pa jwenn" });
+    return;
+  }
+  if (app.status !== "pending") {
+    res.status(400).json({ error: "Aplikasyon pa an atant" });
+    return;
+  }
+  if (!app.userId) {
+    res.status(400).json({ error: "Itilizatè poko konekte. Mande kliyan an konekte premye." });
+    return;
+  }
+
+  const [existingKane] = await db.select().from(kaneTable).where(eq(kaneTable.userId, app.userId));
+  if (existingKane) {
+    res.status(400).json({ error: "Itilizatè a deja gen yon kont Kanè" });
+    return;
+  }
+
+  const accountNumber = generateAccountNumber();
+  const cardNumber = generateCardNumber();
+  const [kane] = await db
+    .insert(kaneTable)
+    .values({
+      userId: app.userId,
+      accountNumber,
+      cardNumber,
+      cardExpiry: generateCardExpiry(),
+      cardCvv: generateCvv(),
+      balance: "250.00",
+      creditScore: 300,
+    })
+    .returning();
+
+  const [updatedApp] = await db
+    .update(accountApplicationsTable)
+    .set({ status: "approved", approvedAt: new Date(), notes: notes ?? null })
+    .where(eq(accountApplicationsTable.id, appId))
+    .returning();
+
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, app.userId));
+  const fullName = user
+    ? `${user.firstName || app.firstName} ${user.lastName || app.lastName}`
+    : `${app.firstName} ${app.lastName}`;
+
+  await db.insert(notificationsTable).values({
+    userId: app.userId,
+    title: "Kont ou a aktive!",
+    message: `Felisitasyon, ${fullName}! Kont Pyram Sterling Bank ou a aktive avèk siksè. Nimewo kont ou: ${accountNumber}. Balans inisyal: G 250.00. Pwen kredi inisyal: 300. Akeyi nan Pyram Sterling Bank!`,
+    isRead: false,
+    type: "success",
+  });
+
+  res.json({ ...formatApplication(updatedApp), kane: formatKane(kane) });
+});
+
+router.post("/applications/:id/reject", async (req, res) => {
+  const appId = parseInt(req.params.id);
+  const { notes } = req.body as { notes?: string };
+
+  const [app] = await db
+    .select()
+    .from(accountApplicationsTable)
+    .where(eq(accountApplicationsTable.id, appId));
+
+  if (!app) {
+    res.status(404).json({ error: "Aplikasyon pa jwenn" });
+    return;
+  }
+
+  const [updated] = await db
+    .update(accountApplicationsTable)
+    .set({ status: "rejected", rejectedAt: new Date(), notes: notes ?? null })
+    .where(eq(accountApplicationsTable.id, appId))
+    .returning();
+
+  if (app.userId) {
+    await db.insert(notificationsTable).values({
+      userId: app.userId,
+      title: "Aplikasyon rejte",
+      message: `Nou regret enfòme ou ke aplikasyon kont Pyram Sterling Bank ou a te rejte.${notes ? " Rezon: " + notes : " Kontakte nou pou plis enfòmasyon."}`,
+      isRead: false,
+      type: "error",
+    });
+  }
+
+  res.json(formatApplication(updated));
+});
+
+// ── Users ─────────────────────────────────────────────────────────────────────
 
 router.get("/users", async (_req, res) => {
   const users = await db.select().from(usersTable).orderBy(desc(usersTable.createdAt));
   const results = await Promise.all(
     users.map(async (u) => {
       const [kane] = await db.select().from(kaneTable).where(eq(kaneTable.userId, u.id));
-      const activeLoans = await db
-        .select()
-        .from(loansTable)
-        .where(eq(loansTable.userId, u.id));
+      const activeLoans = await db.select().from(loansTable).where(eq(loansTable.userId, u.id));
       return {
         ...formatUser(u),
         kane: kane ? formatKane(kane) : null,
@@ -85,10 +227,7 @@ router.get("/users", async (_req, res) => {
 router.get("/users/:userId", async (req, res) => {
   const clerkId = req.params.userId;
   const [user] = await db.select().from(usersTable).where(eq(usersTable.clerkId, clerkId));
-  if (!user) {
-    res.status(404).json({ error: "User not found" });
-    return;
-  }
+  if (!user) { res.status(404).json({ error: "Itilizatè pa jwenn" }); return; }
   const [kane] = await db.select().from(kaneTable).where(eq(kaneTable.userId, user.id));
   const loans = await db.select().from(loansTable).where(eq(loansTable.userId, user.id));
   res.json({
@@ -98,93 +237,86 @@ router.get("/users/:userId", async (req, res) => {
   });
 });
 
+// ── Transactions ──────────────────────────────────────────────────────────────
+
 router.get("/transactions", async (req, res) => {
   const limit = Number(req.query.limit ?? 50);
   const offset = Number(req.query.offset ?? 0);
   const userId = req.query.userId as string | undefined;
 
   let txs: typeof transactionsTable.$inferSelect[];
-
   if (userId) {
     const [user] = await db.select().from(usersTable).where(eq(usersTable.clerkId, userId));
-    if (!user) {
-      res.json([]);
-      return;
-    }
-    txs = await db
-      .select()
-      .from(transactionsTable)
+    if (!user) { res.json([]); return; }
+    txs = await db.select().from(transactionsTable)
       .where(eq(transactionsTable.userId, user.id))
-      .orderBy(desc(transactionsTable.createdAt))
-      .limit(limit)
-      .offset(offset);
+      .orderBy(desc(transactionsTable.createdAt)).limit(limit).offset(offset);
   } else {
-    txs = await db
-      .select()
-      .from(transactionsTable)
-      .orderBy(desc(transactionsTable.createdAt))
-      .limit(limit)
-      .offset(offset);
+    txs = await db.select().from(transactionsTable)
+      .orderBy(desc(transactionsTable.createdAt)).limit(limit).offset(offset);
   }
 
-  res.json(
-    txs.map((t) => ({
-      id: t.id,
-      userId: t.userId,
-      type: t.type,
-      amount: parseFloat(t.amount),
-      description: t.description,
-      status: t.status,
-      recipientAccount: t.recipientAccount ?? null,
-      recipientName: t.recipientName ?? null,
-      senderAccount: t.senderAccount ?? null,
-      createdAt: t.createdAt.toISOString(),
-    }))
-  );
+  res.json(txs.map((t) => ({
+    id: t.id, userId: t.userId, type: t.type, amount: parseFloat(t.amount),
+    description: t.description, status: t.status,
+    recipientAccount: t.recipientAccount ?? null, recipientName: t.recipientName ?? null,
+    senderAccount: t.senderAccount ?? null, createdAt: t.createdAt.toISOString(),
+  })));
 });
+
+// ── Loans ─────────────────────────────────────────────────────────────────────
 
 router.get("/loans", async (req, res) => {
   const status = req.query.status as string | undefined;
-  const loans = await db
-    .select()
-    .from(loansTable)
-    .orderBy(desc(loansTable.createdAt));
-
+  const loans = await db.select().from(loansTable).orderBy(desc(loansTable.createdAt));
   const filtered = status ? loans.filter((l) => l.status === status) : loans;
 
   const results = await Promise.all(
     filtered.map(async (l) => {
       const [user] = await db.select().from(usersTable).where(eq(usersTable.id, l.userId));
-      return formatLoan(l, user);
+      const [kane] = user
+        ? await db.select().from(kaneTable).where(eq(kaneTable.userId, user.id))
+        : [null];
+      const activeLoansCount = loans.filter(
+        (x) => x.userId === l.userId && (x.status === "approved" || x.status === "late") && x.id !== l.id
+      ).length;
+      const creditScore = kane?.creditScore ?? 300;
+      return {
+        ...formatLoan(l, user),
+        eligibility: getLoanEligibility(creditScore, activeLoansCount),
+      };
     })
   );
-
   res.json(results);
 });
 
 router.post("/loans/:loanId/approve", async (req, res) => {
   const loanId = parseInt(req.params.loanId);
   const [loan] = await db.select().from(loansTable).where(eq(loansTable.id, loanId));
-  if (!loan) {
-    res.status(404).json({ error: "Loan not found" });
-    return;
-  }
-  if (loan.status !== "pending") {
-    res.status(400).json({ error: "Loan is not pending" });
-    return;
-  }
+  if (!loan) { res.status(404).json({ error: "Prè pa jwenn" }); return; }
+  if (loan.status !== "pending") { res.status(400).json({ error: "Prè pa an atant" }); return; }
+
+  const interestRate = 0.05;
+  const totalRepayment = parseFloat(loan.amount) * (1 + interestRate);
+  const weeklyPayment = totalRepayment / loan.durationWeeks;
+  const nextPaymentDue = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   const [updatedLoan] = await db
     .update(loansTable)
-    .set({ status: "approved", approvedAt: new Date() })
+    .set({
+      status: "approved",
+      approvedAt: new Date(),
+      totalRepaymentAmount: String(totalRepayment.toFixed(2)),
+      weeklyPaymentAmount: String(weeklyPayment.toFixed(2)),
+      nextPaymentDue,
+    })
     .where(eq(loansTable.id, loanId))
     .returning();
 
   const [kane] = await db.select().from(kaneTable).where(eq(kaneTable.userId, loan.userId));
   if (kane) {
     const newBalance = parseFloat(kane.balance) + parseFloat(loan.amount);
-    await db
-      .update(kaneTable)
+    await db.update(kaneTable)
       .set({ balance: String(newBalance.toFixed(2)) })
       .where(eq(kaneTable.userId, loan.userId));
   }
@@ -193,8 +325,16 @@ router.post("/loans/:loanId/approve", async (req, res) => {
     userId: loan.userId,
     type: "loan_disbursement",
     amount: loan.amount,
-    description: `Loan #${loanId} approved and disbursed`,
+    description: `Prè #${loanId} apwouve epi dekese`,
     status: "completed",
+  });
+
+  await db.insert(notificationsTable).values({
+    userId: loan.userId,
+    title: "Prè apwouve!",
+    message: `Prè ou a nan valè G ${parseFloat(loan.amount).toFixed(2)} apwouve. Total pou ranbouse: G ${totalRepayment.toFixed(2)}. Pèman chak semèn: G ${weeklyPayment.toFixed(2)} pou ${loan.durationWeeks} semèn.`,
+    isRead: false,
+    type: "success",
   });
 
   const [user] = await db.select().from(usersTable).where(eq(usersTable.id, loan.userId));
@@ -204,10 +344,7 @@ router.post("/loans/:loanId/approve", async (req, res) => {
 router.post("/loans/:loanId/reject", async (req, res) => {
   const loanId = parseInt(req.params.loanId);
   const [loan] = await db.select().from(loansTable).where(eq(loansTable.id, loanId));
-  if (!loan) {
-    res.status(404).json({ error: "Loan not found" });
-    return;
-  }
+  if (!loan) { res.status(404).json({ error: "Prè pa jwenn" }); return; }
 
   const [updatedLoan] = await db
     .update(loansTable)
@@ -215,24 +352,26 @@ router.post("/loans/:loanId/reject", async (req, res) => {
     .where(eq(loansTable.id, loanId))
     .returning();
 
+  await db.insert(notificationsTable).values({
+    userId: loan.userId,
+    title: "Prè rejte",
+    message: `Demann prè ou a nan valè G ${parseFloat(loan.amount).toFixed(2)} te rejte.`,
+    isRead: false,
+    type: "error",
+  });
+
   const [user] = await db.select().from(usersTable).where(eq(usersTable.id, loan.userId));
   res.json(formatLoan(updatedLoan, user));
 });
 
+// ── Partners ──────────────────────────────────────────────────────────────────
+
 router.post("/partners/:partnerId/approve", async (req, res) => {
   const partnerId = parseInt(req.params.partnerId);
   const [partner] = await db.select().from(partnersTable).where(eq(partnersTable.id, partnerId));
-  if (!partner) {
-    res.status(404).json({ error: "Partner not found" });
-    return;
-  }
-
-  const [updated] = await db
-    .update(partnersTable)
-    .set({ status: "approved" })
-    .where(eq(partnersTable.id, partnerId))
-    .returning();
-
+  if (!partner) { res.status(404).json({ error: "Patnè pa jwenn" }); return; }
+  const [updated] = await db.update(partnersTable).set({ status: "approved" })
+    .where(eq(partnersTable.id, partnerId)).returning();
   const [kane] = await db.select().from(kaneTable).where(eq(kaneTable.userId, partner.userId));
   res.json(formatPartner(updated, kane?.accountNumber));
 });
@@ -240,20 +379,14 @@ router.post("/partners/:partnerId/approve", async (req, res) => {
 router.post("/partners/:partnerId/reject", async (req, res) => {
   const partnerId = parseInt(req.params.partnerId);
   const [partner] = await db.select().from(partnersTable).where(eq(partnersTable.id, partnerId));
-  if (!partner) {
-    res.status(404).json({ error: "Partner not found" });
-    return;
-  }
-
-  const [updated] = await db
-    .update(partnersTable)
-    .set({ status: "rejected" })
-    .where(eq(partnersTable.id, partnerId))
-    .returning();
-
+  if (!partner) { res.status(404).json({ error: "Patnè pa jwenn" }); return; }
+  const [updated] = await db.update(partnersTable).set({ status: "rejected" })
+    .where(eq(partnersTable.id, partnerId)).returning();
   const [kane] = await db.select().from(kaneTable).where(eq(kaneTable.userId, partner.userId));
   res.json(formatPartner(updated, kane?.accountNumber));
 });
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
 
 router.get("/stats", async (_req, res) => {
   const users = await db.select().from(usersTable);
@@ -261,14 +394,16 @@ router.get("/stats", async (_req, res) => {
   const txs = await db.select().from(transactionsTable);
   const loans = await db.select().from(loansTable);
   const partners = await db.select().from(partnersTable);
+  const apps = await db.select().from(accountApplicationsTable);
 
   const totalBalance = kanes.reduce((sum, k) => sum + parseFloat(k.balance), 0);
   const pendingLoans = loans.filter((l) => l.status === "pending").length;
-  const activeLoans = loans.filter((l) => l.status === "approved").length;
+  const activeLoans = loans.filter((l) => l.status === "approved" || l.status === "late").length;
   const totalLoansIssued = loans
-    .filter((l) => l.status === "approved" || l.status === "repaid")
+    .filter((l) => ["approved", "late", "repaid"].includes(l.status))
     .reduce((sum, l) => sum + parseFloat(l.amount), 0);
   const totalPartnersApproved = partners.filter((p) => p.status === "approved").length;
+  const pendingApplications = apps.filter((a) => a.status === "pending").length;
 
   res.json({
     totalUsers: users.length,
@@ -278,23 +413,34 @@ router.get("/stats", async (_req, res) => {
     activeLoans,
     totalLoansIssued,
     totalPartnersApproved,
+    pendingApplications,
   });
 });
+
+// ── Credit Score ──────────────────────────────────────────────────────────────
 
 router.patch("/users/:userId/credit-score", async (req, res) => {
   const clerkId = req.params.userId;
   const { creditScore } = req.body as { creditScore: number };
 
   if (!creditScore || creditScore < 300 || creditScore > 850) {
-    res.status(400).json({ error: "Credit score must be between 300 and 850" });
+    res.status(400).json({ error: "Pwen kredi dwe ant 300 ak 850" });
     return;
   }
 
   const [user] = await db.select().from(usersTable).where(eq(usersTable.clerkId, clerkId));
-  if (!user) {
-    res.status(404).json({ error: "User not found" });
-    return;
-  }
+  if (!user) { res.status(404).json({ error: "Itilizatè pa jwenn" }); return; }
+
+  const [current] = await db.select().from(kaneTable).where(eq(kaneTable.userId, user.id));
+  if (!current) { res.status(404).json({ error: "Kanè pa jwenn" }); return; }
+
+  await db.insert(creditScoreHistoryTable).values({
+    userId: user.id,
+    previousScore: current.creditScore,
+    newScore: creditScore,
+    change: creditScore - current.creditScore,
+    reason: "Ajisteman manyal pa admin",
+  });
 
   const [updated] = await db
     .update(kaneTable)
@@ -302,22 +448,7 @@ router.patch("/users/:userId/credit-score", async (req, res) => {
     .where(eq(kaneTable.userId, user.id))
     .returning();
 
-  if (!updated) {
-    res.status(404).json({ error: "Kane not found" });
-    return;
-  }
-
-  res.json({
-    id: updated.id,
-    userId: updated.userId,
-    accountNumber: updated.accountNumber,
-    cardNumber: updated.cardNumber,
-    cardExpiry: updated.cardExpiry,
-    cardCvv: updated.cardCvv,
-    balance: parseFloat(updated.balance),
-    creditScore: updated.creditScore,
-    createdAt: updated.createdAt.toISOString(),
-  });
+  res.json(formatKane(updated));
 });
 
 export default router;

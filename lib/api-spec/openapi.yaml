@@ -22,6 +22,10 @@ tags:
     description: Admin operations
   - name: partners
     description: Partner/business management
+  - name: applications
+    description: Account opening applications
+  - name: notifications
+    description: In-app notifications
 
 paths:
   /healthz:
@@ -513,6 +517,154 @@ paths:
               schema:
                 $ref: "#/components/schemas/Kane"
 
+  /admin/applications:
+    get:
+      operationId: adminListApplications
+      tags: [admin]
+      summary: Admin — list all account applications
+      responses:
+        "200":
+          description: All applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Application"
+
+  /admin/applications/{id}/approve:
+    post:
+      operationId: adminApproveApplication
+      tags: [admin]
+      summary: Admin — approve an account application (creates Kanè)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationDecision"
+      responses:
+        "200":
+          description: Application approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+
+  /admin/applications/{id}/reject:
+    post:
+      operationId: adminRejectApplication
+      tags: [admin]
+      summary: Admin — reject an account application
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationDecision"
+      responses:
+        "200":
+          description: Application rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+
+  # ── Applications ────────────────────────────────────────────────────────────
+  /applications:
+    post:
+      operationId: submitApplication
+      tags: [applications]
+      summary: Submit an account opening application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationInput"
+      responses:
+        "201":
+          description: Application submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+
+  /applications/me:
+    get:
+      operationId: getMyApplication
+      tags: [applications]
+      summary: Get my current application status
+      responses:
+        "200":
+          description: My application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+
+  # ── Notifications ────────────────────────────────────────────────────────────
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: Get my notifications
+      responses:
+        "200":
+          description: Notifications list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+
+  /notifications/{id}/read:
+    patch:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark a notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Notification marked as read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notification"
+
+  /notifications/read-all:
+    post:
+      operationId: markAllNotificationsRead
+      tags: [notifications]
+      summary: Mark all notifications as read
+      responses:
+        "200":
+          description: All notifications marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+
 components:
   schemas:
     HealthStatus:
@@ -605,19 +757,27 @@ components:
 
     Loan:
       type: object
-      required: [id, userId, amount, purpose, status, amountRepaid, createdAt]
+      required: [id, userId, amount, purpose, status, amountRepaid, interestRate, durationWeeks, latePayments, createdAt]
       properties:
-        id:              { type: integer }
-        userId:          { type: integer }
-        amount:          { type: number }
-        purpose:         { type: string }
-        status:          { type: string, enum: [pending, approved, rejected, repaid] }
-        amountRepaid:    { type: number }
-        approvedAt:      { type: ["string", "null"] }
-        rejectedAt:      { type: ["string", "null"] }
-        createdAt:       { type: string }
-        userName:        { type: ["string", "null"] }
-        userEmail:       { type: ["string", "null"] }
+        id:                    { type: integer }
+        userId:                { type: integer }
+        amount:                { type: number }
+        purpose:               { type: string }
+        status:                { type: string, enum: [pending, approved, rejected, repaid, late, defaulted] }
+        amountRepaid:          { type: number }
+        interestRate:          { type: number }
+        totalRepaymentAmount:  { type: ["number", "null"] }
+        weeklyPaymentAmount:   { type: ["number", "null"] }
+        durationWeeks:         { type: integer }
+        nextPaymentDue:        { type: ["string", "null"] }
+        latePayments:          { type: integer }
+        approvedAt:            { type: ["string", "null"] }
+        rejectedAt:            { type: ["string", "null"] }
+        createdAt:             { type: string }
+        userName:              { type: ["string", "null"] }
+        userEmail:             { type: ["string", "null"] }
+        eligibility:
+          $ref: "#/components/schemas/LoanEligibility"
 
     LoanRequest:
       type: object
@@ -681,18 +841,73 @@ components:
 
     AdminStats:
       type: object
-      required: [totalUsers, totalBalance, totalTransactions, pendingLoans, activeLoans, totalLoansIssued, totalPartnersApproved]
+      required: [totalUsers, totalBalance, totalTransactions, pendingLoans, activeLoans, totalLoansIssued, totalPartnersApproved, pendingApplications]
       properties:
-        totalUsers:            { type: integer }
-        totalBalance:          { type: number }
-        totalTransactions:     { type: integer }
-        pendingLoans:          { type: integer }
-        activeLoans:           { type: integer }
-        totalLoansIssued:      { type: number }
-        totalPartnersApproved: { type: integer }
+        totalUsers:             { type: integer }
+        totalBalance:           { type: number }
+        totalTransactions:      { type: integer }
+        pendingLoans:           { type: integer }
+        activeLoans:            { type: integer }
+        totalLoansIssued:       { type: number }
+        totalPartnersApproved:  { type: integer }
+        pendingApplications:    { type: integer }
 
     CreditScoreUpdate:
       type: object
       required: [creditScore]
       properties:
         creditScore: { type: integer, minimum: 300, maximum: 850 }
+
+    LoanEligibility:
+      type: object
+      properties:
+        eligible:   { type: boolean }
+        maxAmount:  { type: number }
+        riskLevel:  { type: string }
+        reason:     { type: string }
+
+    Application:
+      type: object
+      required: [id, firstName, lastName, phone, nationalId, appointmentDate, appointmentTime, status, createdAt]
+      properties:
+        id:              { type: integer }
+        userId:          { type: ["integer", "null"] }
+        firstName:       { type: string }
+        lastName:        { type: string }
+        phone:           { type: string }
+        nationalId:      { type: string }
+        appointmentDate: { type: string }
+        appointmentTime: { type: string }
+        status:          { type: string, enum: [pending, approved, rejected] }
+        notes:           { type: ["string", "null"] }
+        createdAt:       { type: string }
+        approvedAt:      { type: ["string", "null"] }
+        rejectedAt:      { type: ["string", "null"] }
+
+    ApplicationInput:
+      type: object
+      required: [firstName, lastName, phone, nationalId, appointmentDate, appointmentTime]
+      properties:
+        firstName:       { type: string }
+        lastName:        { type: string }
+        phone:           { type: string }
+        nationalId:      { type: string }
+        appointmentDate: { type: string }
+        appointmentTime: { type: string }
+
+    ApplicationDecision:
+      type: object
+      properties:
+        notes: { type: string }
+
+    Notification:
+      type: object
+      required: [id, userId, title, message, isRead, type, createdAt]
+      properties:
+        id:        { type: integer }
+        userId:    { type: integer }
+        title:     { type: string }
+        message:   { type: string }
+        isRead:    { type: boolean }
+        type:      { type: string }
+        createdAt: { type: string }

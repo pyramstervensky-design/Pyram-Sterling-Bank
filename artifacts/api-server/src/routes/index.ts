@@ -6,6 +6,8 @@ import transactionsRouter from "./transactions";
 import loansRouter from "./loans";
 import partnersRouter from "./partners";
 import adminRouter from "./admin";
+import applicationsRouter from "./applications";
+import notificationsRouter from "./notifications";
 
 const router: IRouter = Router();
 
@@ -16,5 +18,7 @@ router.use("/transactions", transactionsRouter);
 router.use("/loans", loansRouter);
 router.use("/partners", partnersRouter);
 router.use("/admin", adminRouter);
+router.use("/applications", applicationsRouter);
+router.use("/notifications", notificationsRouter);
 
 export default router;
