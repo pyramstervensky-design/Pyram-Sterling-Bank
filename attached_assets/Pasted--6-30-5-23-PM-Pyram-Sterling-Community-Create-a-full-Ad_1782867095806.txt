@@ -1,0 +1,381 @@
+[6/30, 5:23 PM] Pyram Sterling Community: Create a full Admin Dashboard for Pyram Sterling Bank.
+
+The dashboard must include:
+
+- Pending Account Applications with Approve/Reject buttons
+- User Management (view all customers)
+- Account Management (Kanè details, balances, card numbers)
+- Loan Management (approve/reject loans, view repayment status)
+- Transaction Monitoring (all transfers and deposits)
+- Credit Score Monitoring (300–850 system with risk levels)
+- Appointment Scheduling Management
+
+When an account is approved:
+- Generate account number (PSB-2026-XXXXXX)
+- Generate virtual card number
+- Set initial credit score to 300
+- Activate user account
+
+Only admin can access this dashboard.
+
+Users must NEVER see other users’ data.
+
+The system must be secure, clean, and look like a professional banking admin panel.
+[6/30, 5:24 PM] Pyram Sterling Community: Create a professional User Dashboard for Pyram Sterling Bank.
+
+The dashboard must include:
+
+- Account overview (balance, credit score, virtual card)
+- Bank account information (Kanè number, full name, status)
+- Action buttons:
+  - Send Money
+  - Receive Money
+  - Deposit
+  - Withdraw
+  - Request Loan
+
+- Loan section showing active loans, repayment status, and history
+- Transaction history list
+- Notifications panel
+
+Each user must ONLY see their own data.
+
+Include a credit score system (300–850) with color indicators:
+- Red (300–499)
+- Yellow (500–699)
+- Green (700–850)
+
+The design must be modern, professional, and mobile-friendly.
+
+The system must be secure and prevent users from accessing other users' data.
+[6/30, 5:29 PM] Pyram Sterling Community: Create a secure Money Transfer System for Pyram Sterling Bank.
+
+Users must be able to send money using a recipient Account Number (Kanè ID).
+
+A maximum transaction limit of 200,000 HTG must be enforced per user. No single transfer can exceed this amount, and users must also not exceed their available balance or assigned credit/transaction limit.
+
+Requirements:
+
+* Sender enters recipient account number and amount (HTG)
+* System must validate:
+    * Sufficient balance
+    * Valid recipient account number (Kanè ID)
+    * Sender is not sending money to themselves
+    * Transfer amount does not exceed 200,000 HTG limit per transaction
+    * Sender does not exceed their personal account limit
+
+If valid:
+
+* Deduct money from sender account immediately
+* Add money to receiver account immediately
+* Create a transaction record with timestamp
+
+If invalid:
+
+* Show a clear error message explaining why the transfer failed:
+    * Insufficient balance
+    * Invalid account number
+    * Self-transfer not allowed
+    * Exceeds 200,000 HTG transaction limit
+    * Exceeds user account limit
+
+After successful transfer:
+
+* Send notification to both sender and receiver
+* Update both account balances immediately
+* Log transaction in history
+
+Transaction History must include:
+
+* Sender name and account number
+* Receiver name and account number
+* Amount transferred
+* Date and time
+* Transaction status (Success / Failed)
+
+Security Requirements:
+
+* Prevent unauthorized transfers
+* Ensure users can only access their own accounts
+* Validate all transactions server-side
+* Log all transfer attempts for security auditing
+
+The system must be fast, secure, and reliable like a modern digital banking platform.
+[6/30, 5:31 PM] Pyram Sterling Community: Create a Fraud Protection and Security System for Pyram Sterling Bank.
+
+Implement a secure PIN-based authentication system:
+
+- Each user must create a 4–6 digit PIN.
+- PIN is required for login, transfers, and loan actions.
+- After 3 failed PIN attempts, the account must be temporarily locked.
+
+Add biometric authentication support (if device supports it):
+- Face ID
+- Fingerprint
+
+Implement a fraud detection system that monitors:
+- Multiple rapid transactions
+- Large unusual transfers
+- Login from new devices
+- Suspicious activity patterns
+
+If suspicious activity is detected:
+- Flag account as "Suspicious"
+- Temporarily block sensitive actions
+- Notify both user and admin
+
+Track device information:
+- Device ID
+- Browser or phone type
+- Approximate location
+
+If login is from a new device:
+- Require additional verification
+
+All transactions must require:
+- PIN verification
+- Balance validation
+- Fraud risk check
+
+The system must prioritize security and protect against unauthorized access or fraudulent transfers.
+[6/30, 5:37 PM] Pyram Sterling Community: Implement a secure Cash Withdrawal and Money Transfer limit system for Pyram Sterling Bank.
+
+Rules:
+
+1. Users can withdraw a maximum of 5,000,000 HTG in total lifetime balance withdrawals.
+2. Daily withdrawal limit is 200,000 HTG per day.
+3. Money transfers between users are also limited to 200,000 HTG per transaction and per day total.
+
+System must:
+
+- Track daily usage for each user and reset every 24 hours.
+- Block any transaction exceeding 200,000 HTG.
+- Prevent withdrawals or transfers if daily limit is exceeded.
+- Validate sufficient balance before any transaction.
+- Require PIN verification for all withdrawals and transfers.
+
+Security:
+
+- Log all transactions with timestamp.
+- Detect and prevent suspicious rapid transactions.
+- Temporarily block account if abnormal activity is detected.
+
+The system must enforce limits strictly and ensure no user can bypass restrictions.
+[6/30, 5:53 PM] Pyram Sterling Community: Create a Business Account Registration system for Pyram Sterling Bank.
+
+Add a "Create Business Account" page where companies can register.
+
+Required fields:
+- Company Name
+- Business Registration ID (optional)
+- Location
+- Business Email
+- Phone Number
+- Authorized Person Name
+- Password or Business PIN
+
+After registration:
+- Automatically generate a Business Account (Kanè Biznis)
+- Example format: PSB-BIZ-XXXXXX
+- Initialize balance at 0
+
+System must support two modes:
+1. Simple Mode: immediate activation with limited features
+2. Verified Mode: requires admin approval before full access
+
+Business accounts must have access to:
+- Payroll system
+- Bulk payments
+- Employee management
+- Transaction history
+
+Rules:
+- One business per account
+- Prevent duplicate business registrations
+- Log all actions for security
+[6/30, 5:55 PM] Pyram Sterling Community: Create a complete Business Dashboard for Pyram Sterling Bank.
+
+The dashboard must include:
+
+- Business overview (name, balance, employees, payroll history)
+- Business wallet section (account number, balance, pending payments)
+- Employee management system (add, edit, deactivate employees)
+- Payroll system (run payroll button, salary distribution)
+- Bulk payment system (manual list or CSV upload)
+- Transaction history (recipient, amount, date, status)
+
+Add a Business Verification System:
+
+Statuses:
+- Pending
+- Verified
+- Rejected
+
+Only verified businesses can access full features such as payroll and bulk payments.
+
+Security:
+- Only authorized business admin can perform payments
+- All transactions must be logged
+- PIN required for large payments
+- Fraud detection enabled
+
+System must be secure, professional, and similar to real banking platforms.
+[6/30, 5:59 PM] Pyram Sterling Community: Create an Automatic Monthly Payroll System for Pyram Sterling Bank.
+
+The system must allow businesses to automatically pay employees on a scheduled basis.
+
+Features:
+
+1. Payroll Modes:
+- Manual (Run Payroll button)
+- Automatic (system executes automatically)
+
+2. Schedule Options:
+- Weekly (7 days)
+- Bi-weekly (15 days)
+- Monthly (30 days)
+- Custom pay date selection
+
+3. Automatic Process:
+- On scheduled date, system calculates total payroll
+- Verifies business account balance
+- Deducts total salary from business account
+- Distributes payments to all employees automatically
+- Logs all transactions with timestamp
+
+4. Failure Handling:
+- If insufficient funds, cancel payroll
+- Mark payroll status as FAILED
+- Notify business admin
+
+5. Security:
+- Only verified business accounts can activate auto payroll
+- PIN required to enable/disable automation
+- All payroll actions must be logged
+
+6. History:
+- Show payroll history including date, total amount, employees paid, and status
+
+System must be fully automated, secure, and reliable.
+[6/30, 8:46 PM] Pyram Sterling Community: Build a “Richès (Wealth)” section for a fintech banking app called Pyram Sterling Bank.
+
+This section must be part of the main app navigation but separated from core banking operations.
+
+⸻
+
+🧭 STRUCTURE OF RICHÈS
+
+The Wealth section must contain ONLY 4 services:
+
+⸻
+
+1. 💰 LOANS (PRÈ)
+
+* Apply for loans
+* Check eligibility
+* View repayment schedules
+* Credit score impact display
+
+⸻
+
+2. 🤝 PARTNERS (PATNÈ)
+
+* Business services
+* Payroll system access
+* Bulk payment tools
+* Corporate financial services
+
+⸻
+
+3. 🆕 OPEN PERSONAL ACCOUNT (OUVÈ YON KONT)
+
+This is an onboarding feature.
+
+Form must include:
+
+* First Name
+* Last Name
+* Phone Number
+* Haitian National ID
+* Agreement checkbox
+* Account opening fee: 500 HTG
+* Appointment date & time selection
+
+After submission:
+
+* Request goes to admin approval dashboard
+* After approval:
+    * Generate Kanè (account number)
+    * Generate virtual card
+    * Activate account
+
+⸻
+
+4. 🏢 OPEN BUSINESS ACCOUNT (OUVÈ YON KONT BIZNIS)
+
+This is for companies.
+
+Form must include:
+
+* Company Name
+* Business Email
+* Phone Number
+* Authorized Person Name
+* Business Registration ID (optional)
+* Agreement checkbox
+
+💰 BUSINESS ACCOUNT FEES RULE:
+
+* Account opening fee: 1000 HTG
+* After successful approval:
+    * 500 HTG is automatically credited to the new business Kanè as starting balance
+    * Remaining 500 HTG is used as service/creation fee
+
+After submission:
+
+* Status = Pending
+* Admin must verify and approve
+* Once approved:
+    * Generate Business Account (Kanè Biznis)
+    * Activate business dashboard access
+    * Enable payroll and bulk payment tools
+
+⸻
+
+🎨 UI/UX REQUIREMENTS
+
+* Modern fintech design (Bank of America / Revolut style)
+* Clean card-based layout
+* White + blue gradient theme
+* Mobile-first design
+* Smooth animations
+* Fast loading and low data usage
+
+⸻
+
+🧭 WEALTH HOME SCREEN LAYOUT
+
+The Wealth page must display 4 cards:
+
+💰 Loans
+🤝 Partners
+🆕 Open Personal Account
+🏢 Open Business Account
+
+Each card must be clickable and lead to its respective flow.
+
+⸻
+
+🔐 SYSTEM RULES
+
+* Personal accounts require admin approval
+* Business accounts require verification before activation
+* All submissions must be logged
+* No user can access other users’ data
+* Security and validation required on all forms
+
+⸻
+
+🎯 GOAL
+
+The Wealth section must act as a financial onboarding hub and service center, clearly separated from core banking operations like transfers and dashboard activities.
