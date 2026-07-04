@@ -1,0 +1,103 @@
+[6/30, 5:23 PM] Pyram Sterling Community: Create a full Admin Dashboard for Pyram Sterling Bank.
+
+The dashboard must include:
+
+- Pending Account Applications with Approve/Reject buttons
+- User Management (view all customers)
+- Account Management (Kanè details, balances, card numbers)
+- Loan Management (approve/reject loans, view repayment status)
+- Transaction Monitoring (all transfers and deposits)
+- Credit Score Monitoring (300–850 system with risk levels)
+- Appointment Scheduling Management
+
+When an account is approved:
+- Generate account number (PSB-2026-XXXXXX)
+- Generate virtual card number
+- Set initial credit score to 300
+- Activate user account
+
+Only admin can access this dashboard.
+
+Users must NEVER see other users’ data.
+
+The system must be secure, clean, and look like a professional banking admin panel.
+[6/30, 5:24 PM] Pyram Sterling Community: Create a professional User Dashboard for Pyram Sterling Bank.
+
+The dashboard must include:
+
+- Account overview (balance, credit score, virtual card)
+- Bank account information (Kanè number, full name, status)
+- Action buttons:
+  - Send Money
+  - Receive Money
+  - Deposit
+  - Withdraw
+  - Request Loan
+
+- Loan section showing active loans, repayment status, and history
+- Transaction history list
+- Notifications panel
+
+Each user must ONLY see their own data.
+
+Include a credit score system (300–850) with color indicators:
+- Red (300–499)
+- Yellow (500–699)
+- Green (700–850)
+
+The design must be modern, professional, and mobile-friendly.
+
+The system must be secure and prevent users from accessing other users' data.
+[6/30, 5:29 PM] Pyram Sterling Community: Create a secure Money Transfer System for Pyram Sterling Bank.
+
+Users must be able to send money using a recipient Account Number (Kanè ID).
+
+A maximum transaction limit of 200,000 HTG must be enforced per user. No single transfer can exceed this amount, and users must also not exceed their available balance or assigned credit/transaction limit.
+
+Requirements:
+
+* Sender enters recipient account number and amount (HTG)
+* System must validate:
+    * Sufficient balance
+    * Valid recipient account number (Kanè ID)
+    * Sender is not sending money to themselves
+    * Transfer amount does not exceed 200,000 HTG limit per transaction
+    * Sender does not exceed their personal account limit
+
+If valid:
+
+* Deduct money from sender account immediately
+* Add money to receiver account immediately
+* Create a transaction record with timestamp
+
+If invalid:
+
+* Show a clear error message explaining why the transfer failed:
+    * Insufficient balance
+    * Invalid account number
+    * Self-transfer not allowed
+    * Exceeds 200,000 HTG transaction limit
+    * Exceeds user account limit
+
+After successful transfer:
+
+* Send notification to both sender and receiver
+* Update both account balances immediately
+* Log transaction in history
+
+Transaction History must include:
+
+* Sender name and account number
+* Receiver name and account number
+* Amount transferred
+* Date and time
+* Transaction status (Success / Failed)
+
+Security Requirements:
+
+* Prevent unauthorized transfers
+* Ensure users can only access their own accounts
+* Validate all transactions server-side
+* Log all transfer attempts for security auditing
+
+The system must be fast, secure, and reliable like a modern digital banking platform.

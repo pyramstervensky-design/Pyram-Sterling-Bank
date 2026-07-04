@@ -31,7 +31,7 @@ router.get("/", requireAuth, async (req, res) => {
 
 router.patch("/:id/read", requireAuth, async (req, res) => {
   const user = (req as AuthReq).dbUser;
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params["id"] as string);
 
   const [notif] = await db
     .select()

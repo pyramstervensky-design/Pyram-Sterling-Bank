@@ -1,9 +1,11 @@
 import { Router, type Request } from "express";
-import { db, usersTable, kaneTable, transactionsTable } from "@workspace/db";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { db, usersTable, kaneTable, transactionsTable, notificationsTable } from "@workspace/db";
+import { eq, desc, and } from "drizzle-orm";
 import { requireAuth } from "../lib/auth";
 
 const router = Router();
+
+const TRANSFER_LIMIT_HTG = 200_000;
 
 type AuthReq = Request & { dbUser: typeof usersTable.$inferSelect };
 
@@ -22,13 +24,17 @@ function formatTx(t: typeof transactionsTable.$inferSelect) {
   };
 }
 
+function fmtAmount(n: number) {
+  return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 router.get("/", requireAuth, async (req, res) => {
   const user = (req as AuthReq).dbUser;
   const limit = Number(req.query.limit ?? 20);
   const offset = Number(req.query.offset ?? 0);
   const type = req.query.type as string | undefined;
 
-  let query = db
+  const txs = await db
     .select()
     .from(transactionsTable)
     .where(
@@ -43,13 +49,11 @@ router.get("/", requireAuth, async (req, res) => {
     .limit(limit)
     .offset(offset);
 
-  const txs = await query;
   res.json(txs.map(formatTx));
 });
 
 router.get("/summary", requireAuth, async (req, res) => {
   const user = (req as AuthReq).dbUser;
-
   const [kane] = await db.select().from(kaneTable).where(eq(kaneTable.userId, user.id));
   const txs = await db.select().from(transactionsTable).where(eq(transactionsTable.userId, user.id));
 
@@ -105,6 +109,14 @@ router.post("/deposit", requireAuth, async (req, res) => {
     })
     .returning();
 
+  await db.insert(notificationsTable).values({
+    userId: user.id,
+    title: "Depo reyisi",
+    message: `Ou depoze G ${fmtAmount(amount)} nan kont ou. Nouvo balans: G ${fmtAmount(newBalance)}.`,
+    type: "success",
+    isRead: false,
+  });
+
   res.status(201).json(formatTx(tx));
 });
 
@@ -125,13 +137,15 @@ router.post("/withdraw", requireAuth, async (req, res) => {
 
   const currentBalance = parseFloat(kane.balance);
   if (currentBalance < amount) {
-    res.status(400).json({ error: "Pa gen ase lajan" });
+    res.status(400).json({ error: "Pa gen ase lajan nan kont ou" });
     return;
   }
 
+  const newBalance = currentBalance - amount;
+
   await db
     .update(kaneTable)
-    .set({ balance: String((currentBalance - amount).toFixed(2)) })
+    .set({ balance: String(newBalance.toFixed(2)) })
     .where(eq(kaneTable.userId, user.id));
 
   const [tx] = await db
@@ -144,6 +158,14 @@ router.post("/withdraw", requireAuth, async (req, res) => {
       status: "completed",
     })
     .returning();
+
+  await db.insert(notificationsTable).values({
+    userId: user.id,
+    title: "Retrè reyisi",
+    message: `Ou retire G ${fmtAmount(amount)} nan kont ou. Nouvo balans: G ${fmtAmount(newBalance)}.`,
+    type: "info",
+    isRead: false,
+  });
 
   res.status(201).json(formatTx(tx));
 });
@@ -164,6 +186,10 @@ router.post("/transfer", requireAuth, async (req, res) => {
     res.status(400).json({ error: "Nimewo kont destinatè obligatwa" });
     return;
   }
+  if (amount > TRANSFER_LIMIT_HTG) {
+    res.status(400).json({ error: `Transfè a depase limit maksimòm ${TRANSFER_LIMIT_HTG.toLocaleString()} HTG pa tranzaksyon` });
+    return;
+  }
 
   const [senderKane] = await db.select().from(kaneTable).where(eq(kaneTable.userId, user.id));
   if (!senderKane) {
@@ -178,7 +204,7 @@ router.post("/transfer", requireAuth, async (req, res) => {
 
   const currentBalance = parseFloat(senderKane.balance);
   if (currentBalance < amount) {
-    res.status(400).json({ error: "Pa gen ase lajan" });
+    res.status(400).json({ error: "Pa gen ase lajan nan kont ou" });
     return;
   }
 
@@ -188,7 +214,7 @@ router.post("/transfer", requireAuth, async (req, res) => {
     .where(eq(kaneTable.accountNumber, recipientAccount));
 
   if (!recipientKane) {
-    res.status(404).json({ error: "Kont destinatè pa jwenn" });
+    res.status(404).json({ error: "Nimewo kont destinatè pa jwenn. Verifye li epi eseye ankò." });
     return;
   }
 
@@ -197,15 +223,24 @@ router.post("/transfer", requireAuth, async (req, res) => {
     .from(usersTable)
     .where(eq(usersTable.id, recipientKane.userId));
 
+  const senderNewBalance = currentBalance - amount;
+  const recipientNewBalance = parseFloat(recipientKane.balance) + amount;
+
   await db
     .update(kaneTable)
-    .set({ balance: String((currentBalance - amount).toFixed(2)) })
+    .set({ balance: String(senderNewBalance.toFixed(2)) })
     .where(eq(kaneTable.userId, user.id));
 
   await db
     .update(kaneTable)
-    .set({ balance: String((parseFloat(recipientKane.balance) + amount).toFixed(2)) })
+    .set({ balance: String(recipientNewBalance.toFixed(2)) })
     .where(eq(kaneTable.userId, recipientKane.userId));
+
+  const recipientFullName = recipientUser
+    ? `${recipientUser.firstName} ${recipientUser.lastName}`.trim()
+    : recipientAccount;
+
+  const senderFullName = `${user.firstName} ${user.lastName}`.trim();
 
   const [tx] = await db
     .insert(transactionsTable)
@@ -213,10 +248,10 @@ router.post("/transfer", requireAuth, async (req, res) => {
       userId: user.id,
       type: "transfer",
       amount: String(amount.toFixed(2)),
-      description: description ?? `Transfè bay ${recipientAccount}`,
+      description: description ?? `Transfè bay ${recipientFullName}`,
       status: "completed",
       recipientAccount,
-      recipientName: recipientUser ? `${recipientUser.firstName} ${recipientUser.lastName}` : null,
+      recipientName: recipientFullName,
       senderAccount: senderKane.accountNumber,
     })
     .returning();
@@ -225,10 +260,26 @@ router.post("/transfer", requireAuth, async (req, res) => {
     userId: recipientKane.userId,
     type: "deposit",
     amount: String(amount.toFixed(2)),
-    description: `Transfer from ${senderKane.accountNumber}`,
+    description: description ?? `Transfè soti nan ${senderFullName || senderKane.accountNumber}`,
     status: "completed",
     senderAccount: senderKane.accountNumber,
     recipientAccount,
+  });
+
+  await db.insert(notificationsTable).values({
+    userId: user.id,
+    title: "Transfè reyisi",
+    message: `Ou voye G ${fmtAmount(amount)} bay ${recipientFullName} (${recipientAccount}). Nouvo balans: G ${fmtAmount(senderNewBalance)}.`,
+    type: "success",
+    isRead: false,
+  });
+
+  await db.insert(notificationsTable).values({
+    userId: recipientKane.userId,
+    title: "Ou resevwa lajan",
+    message: `Ou resevwa G ${fmtAmount(amount)} soti nan ${senderFullName || senderKane.accountNumber}. Nouvo balans: G ${fmtAmount(recipientNewBalance)}.`,
+    type: "success",
+    isRead: false,
   });
 
   res.status(201).json(formatTx(tx));

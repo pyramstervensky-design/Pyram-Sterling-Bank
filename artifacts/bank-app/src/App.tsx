@@ -17,6 +17,8 @@ import LoansPage from "@/pages/loans";
 import PartnersPage from "@/pages/partners";
 import ProfilePage from "@/pages/profile";
 import ApplyPage from "@/pages/apply";
+import DepositPage from "@/pages/deposit";
+import WithdrawPage from "@/pages/withdraw";
 import AdminDashboardPage from "@/pages/admin/index";
 import AdminUsersPage from "@/pages/admin/users";
 import AdminTransactionsPage from "@/pages/admin/transactions";
@@ -156,6 +158,8 @@ function ClerkProviderWithRoutes() {
             <Route path="/profile">{() => <ProtectedRoute component={ProfilePage} />}</Route>
             
             <Route path="/apply">{() => <ProtectedRoute component={ApplyPage} />}</Route>
+            <Route path="/deposit">{() => <ProtectedRoute component={DepositPage} />}</Route>
+            <Route path="/withdraw">{() => <ProtectedRoute component={WithdrawPage} />}</Route>
             
             <Route path="/admin">{() => <AdminRoute component={AdminDashboardPage} />}</Route>
             <Route path="/admin/users">{() => <AdminRoute component={AdminUsersPage} />}</Route>

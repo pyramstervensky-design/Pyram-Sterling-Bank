@@ -1,15 +1,80 @@
+import { useState } from "react";
 import { useGetMe, useGetKane, useListMyLoans, useGetMyApplication } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppLayout } from "@/components/layout";
 import { CreditScore } from "@/components/credit-score";
-import { Clock, FileText, CheckCircle2 } from "lucide-react";
+import { Clock, FileText, CheckCircle2, Copy, X } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 
 const DARK_BLUE = "#1a2e6e";
 const GOLD = "#d4960a";
 const SKY = "#38bdf8";
+
+function ActionBtn({ href, color, textColor, label, sub, icon }: { href: string; color: string; textColor: string; label: string; sub: string; icon: string }) {
+  return (
+    <Link href={href} className="rounded-xl p-3 flex flex-col gap-1 transition-opacity hover:opacity-80 border border-slate-100" style={{ backgroundColor: color }}>
+      <span className="text-lg font-bold leading-none" style={{ color: textColor }}>{icon}</span>
+      <span className="text-sm font-semibold leading-tight" style={{ color: textColor }}>{label}</span>
+      <span className="text-xs opacity-60 leading-tight" style={{ color: textColor }}>{sub}</span>
+    </Link>
+  );
+}
+
+function ReceiveBtn({ kane, profile }: { kane: any; profile: any }) {
+  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const copy = () => {
+    if (!kane?.accountNumber) return;
+    navigator.clipboard.writeText(kane.accountNumber);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="rounded-xl p-3 flex flex-col gap-1 transition-opacity hover:opacity-80 border border-slate-100 text-left"
+        style={{ backgroundColor: "#f0f9ff", color: "#0369a1" }}
+      >
+        <span className="text-lg font-bold leading-none">←</span>
+        <span className="text-sm font-semibold leading-tight">Resevwa</span>
+        <span className="text-xs opacity-60 leading-tight">Nimewo kont</span>
+      </button>
+
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={() => setOpen(false)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-serif font-semibold text-lg" style={{ color: DARK_BLUE }}>Resevwa Lajan</h3>
+              <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-700"><X className="w-5 h-5" /></button>
+            </div>
+            <p className="text-sm text-slate-500 mb-5">Pataje nimewo kont ou a pou resevwa transfè.</p>
+            <div className="rounded-xl p-4 mb-2" style={{ backgroundColor: "#f0f4ff", border: "1px solid #c7d4f8" }}>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Non</p>
+              <p className="font-semibold text-slate-900">{profile?.firstName} {profile?.lastName}</p>
+            </div>
+            <div className="rounded-xl p-4 mb-5" style={{ backgroundColor: "#f0f4ff", border: "1px solid #c7d4f8" }}>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Nimewo Kont (Kanè)</p>
+              <p className="font-mono font-bold text-xl" style={{ color: DARK_BLUE }}>{kane?.accountNumber ?? "—"}</p>
+            </div>
+            <button
+              onClick={copy}
+              className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-colors"
+              style={{ backgroundColor: copied ? "#dcfce7" : GOLD, color: copied ? "#15803d" : "#fff" }}
+            >
+              <Copy className="w-4 h-4" />
+              {copied ? "Kopye!" : "Kopye Nimewo Kont"}
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
 
 function SectionDivider() {
   return (
@@ -211,21 +276,13 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="mt-6 flex gap-3">
-            <Link
-              href="/send"
-              className="inline-flex items-center justify-center rounded-lg px-5 py-2 text-sm font-semibold transition-colors"
-              style={{ backgroundColor: GOLD, color: "#fff" }}
-            >
-              Voye Lajan
-            </Link>
-            <Link
-              href="/transactions"
-              className="inline-flex items-center justify-center rounded-lg px-5 py-2 text-sm font-semibold border transition-colors text-slate-600 hover:bg-slate-50"
-              style={{ borderColor: "#cbd5e1" }}
-            >
-              Istwa Tranzaksyon
-            </Link>
+          <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <ActionBtn href="/send" color={GOLD} textColor="#fff" label="Voye Lajan" sub="Transfè" icon="→" />
+            <ActionBtn href="/deposit" color="#dcfce7" textColor="#15803d" label="Depo" sub="Ajoute lajan" icon="↓" />
+            <ActionBtn href="/withdraw" color="#fee2e2" textColor="#dc2626" label="Retrè" sub="Retire lajan" icon="↑" />
+            <ActionBtn href="/loans" color="#eff6ff" textColor="#1d4ed8" label="Mande Prè" sub="Jwenn prè" icon="⬡" />
+            <ReceiveBtn kane={kane} profile={profile} />
+            <ActionBtn href="/transactions" color="#f8fafc" textColor="#475569" label="Istwa" sub="Tranzaksyon" icon="≡" />
           </div>
         </section>
 

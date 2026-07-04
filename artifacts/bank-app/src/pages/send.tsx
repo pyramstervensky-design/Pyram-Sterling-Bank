@@ -112,7 +112,7 @@ export default function SendPage() {
             <Card className="bg-slate-50 border-none shadow-none">
               <CardContent className="p-6 text-sm text-slate-600 space-y-4">
                 <h4 className="font-semibold text-slate-900">Limit Transfè</h4>
-                <p>Kont estanda ka transfere jiska G 50,000 pa jou.</p>
+                <p>Maksimòm <strong>G 200,000 HTG</strong> pa tranzaksyon. Pa depase balans disponib ou.</p>
                 <h4 className="font-semibold text-slate-900 pt-2">Sekirite</h4>
                 <p>Tout transfè yo chifre epi surveye pou aktivite fwodè.</p>
               </CardContent>
