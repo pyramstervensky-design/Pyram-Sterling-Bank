@@ -1,1 +1,2 @@
 - [Clerk JWT email claims](clerk-jwt-email-claims.md) — Clerk's prod JWT omits email from sessionClaims; auto-provisioning must fall back to clerkClient.users.getUser() or UNIQUE(email) 500s hit every 2nd+ user.
+- [Appointment lifecycle](appointment-lifecycle.md) — account_applications state machine; Kanè bank account is created ONLY on Complete (from confirmed/rescheduled), never on Accept.

@@ -59,9 +59,13 @@ function formatApplication(a: typeof accountApplicationsTable.$inferSelect) {
     firstName: a.firstName, lastName: a.lastName, phone: a.phone, nationalId: a.nationalId,
     appointmentDate: a.appointmentDate, appointmentTime: a.appointmentTime,
     status: a.status, notes: a.notes ?? null,
+    rejectionReason: a.rejectionReason ?? null,
     createdAt: a.createdAt.toISOString(),
     approvedAt: a.approvedAt?.toISOString() ?? null,
     rejectedAt: a.rejectedAt?.toISOString() ?? null,
+    confirmedAt: a.confirmedAt?.toISOString() ?? null,
+    rescheduledAt: a.rescheduledAt?.toISOString() ?? null,
+    completedAt: a.completedAt?.toISOString() ?? null,
   };
 }
 
@@ -108,7 +112,13 @@ router.get("/applications", async (_req, res) => {
   res.json(results);
 });
 
-router.post("/applications/:id/approve", async (req, res) => {
+// Terminal (closed) states — no further transitions allowed.
+// Legacy "approved" is treated as equivalent to "completed".
+const TERMINAL_STATUSES = ["completed", "approved", "rejected"] as const;
+const isTerminal = (status: string) => TERMINAL_STATUSES.includes(status as never);
+
+// Accept / Confirm an appointment (no account creation yet)
+router.post("/applications/:id/confirm", async (req, res) => {
   const appId = parseInt(req.params.id);
   const { notes } = req.body as { notes?: string };
 
@@ -118,11 +128,98 @@ router.post("/applications/:id/approve", async (req, res) => {
     .where(eq(accountApplicationsTable.id, appId));
 
   if (!app) {
-    res.status(404).json({ error: "Aplikasyon pa jwenn" });
+    res.status(404).json({ error: "Randevou pa jwenn" });
     return;
   }
-  if (app.status !== "pending") {
-    res.status(400).json({ error: "Aplikasyon pa an atant" });
+  if (isTerminal(app.status)) {
+    res.status(400).json({ error: "Randevou sa a deja fèmen" });
+    return;
+  }
+
+  const [updated] = await db
+    .update(accountApplicationsTable)
+    .set({ status: "confirmed", confirmedAt: new Date(), notes: notes ?? app.notes })
+    .where(eq(accountApplicationsTable.id, appId))
+    .returning();
+
+  if (app.userId) {
+    await db.insert(notificationsTable).values({
+      userId: app.userId,
+      title: "Randevou ou konfime",
+      message: `Bonjou ${app.firstName}! Randevou ou pou ouvèti kont Pyram Sterling Bank la konfime pou ${app.appointmentDate} a ${app.appointmentTime}. Nap tann ou.${notes ? " Nòt: " + notes : ""}`,
+      isRead: false,
+      type: "success",
+    });
+  }
+
+  res.json(formatApplication(updated));
+});
+
+// Reschedule an appointment (new date/time)
+router.post("/applications/:id/reschedule", async (req, res) => {
+  const appId = parseInt(req.params.id);
+  const { appointmentDate, appointmentTime } = req.body as {
+    appointmentDate?: string;
+    appointmentTime?: string;
+  };
+
+  if (!appointmentDate || !appointmentTime) {
+    res.status(400).json({ error: "Dat ak lè nouvo randevou obligatwa" });
+    return;
+  }
+
+  const [app] = await db
+    .select()
+    .from(accountApplicationsTable)
+    .where(eq(accountApplicationsTable.id, appId));
+
+  if (!app) {
+    res.status(404).json({ error: "Randevou pa jwenn" });
+    return;
+  }
+  if (isTerminal(app.status)) {
+    res.status(400).json({ error: "Randevou sa a deja fèmen" });
+    return;
+  }
+
+  const [updated] = await db
+    .update(accountApplicationsTable)
+    .set({ status: "rescheduled", rescheduledAt: new Date(), appointmentDate, appointmentTime })
+    .where(eq(accountApplicationsTable.id, appId))
+    .returning();
+
+  if (app.userId) {
+    await db.insert(notificationsTable).values({
+      userId: app.userId,
+      title: "Randevou ou chanje",
+      message: `Bonjou ${app.firstName}! Randevou ou pou ouvèti kont Pyram Sterling Bank la deplase pou ${appointmentDate} a ${appointmentTime}. Tanpri konfime disponibilite ou.`,
+      isRead: false,
+      type: "info",
+    });
+  }
+
+  res.json(formatApplication(updated));
+});
+
+// Complete an appointment — creates the Kanè account
+router.post("/applications/:id/complete", async (req, res) => {
+  const appId = parseInt(req.params.id);
+  const { notes } = req.body as { notes?: string };
+
+  const [app] = await db
+    .select()
+    .from(accountApplicationsTable)
+    .where(eq(accountApplicationsTable.id, appId));
+
+  if (!app) {
+    res.status(404).json({ error: "Randevou pa jwenn" });
+    return;
+  }
+  // A meeting must be accepted (confirmed/rescheduled) before it can be completed.
+  if (app.status !== "confirmed" && app.status !== "rescheduled") {
+    res.status(400).json({
+      error: "Ou dwe aksepte randevou a anvan ou konplete li",
+    });
     return;
   }
   if (!app.userId) {
@@ -136,46 +233,60 @@ router.post("/applications/:id/approve", async (req, res) => {
     return;
   }
 
+  const userId = app.userId;
   const accountNumber = generateAccountNumber();
   const cardNumber = generateCardNumber();
-  const [kane] = await db
-    .insert(kaneTable)
-    .values({
-      userId: app.userId,
-      accountNumber,
-      cardNumber,
-      cardExpiry: generateCardExpiry(),
-      cardCvv: generateCvv(),
-      balance: "250.00",
-      creditScore: 300,
-    })
-    .returning();
 
-  const [updatedApp] = await db
-    .update(accountApplicationsTable)
-    .set({ status: "approved", approvedAt: new Date(), notes: notes ?? null })
-    .where(eq(accountApplicationsTable.id, appId))
-    .returning();
+  let kane;
+  let updatedApp;
+  try {
+    ({ kane, updatedApp } = await db.transaction(async (tx) => {
+      const [createdKane] = await tx
+        .insert(kaneTable)
+        .values({
+          userId,
+          accountNumber,
+          cardNumber,
+          cardExpiry: generateCardExpiry(),
+          cardCvv: generateCvv(),
+          balance: "250.00",
+          creditScore: 300,
+        })
+        .returning();
 
-  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, app.userId));
+      const [updated] = await tx
+        .update(accountApplicationsTable)
+        .set({ status: "completed", completedAt: new Date(), approvedAt: new Date(), notes: notes ?? app.notes })
+        .where(eq(accountApplicationsTable.id, appId))
+        .returning();
+
+      return { kane: createdKane, updatedApp: updated };
+    }));
+  } catch (err) {
+    req.log.error({ err }, "Failed to complete application and create Kanè");
+    res.status(400).json({ error: "Itilizatè a deja gen yon kont Kanè" });
+    return;
+  }
+
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
   const fullName = user
     ? `${user.firstName || app.firstName} ${user.lastName || app.lastName}`
     : `${app.firstName} ${app.lastName}`;
 
   await db.insert(notificationsTable).values({
-    userId: app.userId,
+    userId,
     title: "Kont ou a aktive!",
     message: `Felisitasyon, ${fullName}! Kont Pyram Sterling Bank ou a aktive avèk siksè. Nimewo kont ou: ${accountNumber}. Balans inisyal: G 250.00. Pwen kredi inisyal: 300. Akeyi nan Pyram Sterling Bank!`,
     isRead: false,
     type: "success",
   });
 
-  res.json({ ...formatApplication(updatedApp), kane: formatKane(kane) });
+  res.json(formatApplication(updatedApp));
 });
 
 router.post("/applications/:id/reject", async (req, res) => {
   const appId = parseInt(req.params.id);
-  const { notes } = req.body as { notes?: string };
+  const { reason } = req.body as { reason?: string };
 
   const [app] = await db
     .select()
@@ -183,21 +294,25 @@ router.post("/applications/:id/reject", async (req, res) => {
     .where(eq(accountApplicationsTable.id, appId));
 
   if (!app) {
-    res.status(404).json({ error: "Aplikasyon pa jwenn" });
+    res.status(404).json({ error: "Randevou pa jwenn" });
+    return;
+  }
+  if (isTerminal(app.status)) {
+    res.status(400).json({ error: "Randevou sa a deja fèmen" });
     return;
   }
 
   const [updated] = await db
     .update(accountApplicationsTable)
-    .set({ status: "rejected", rejectedAt: new Date(), notes: notes ?? null })
+    .set({ status: "rejected", rejectedAt: new Date(), rejectionReason: reason ?? null })
     .where(eq(accountApplicationsTable.id, appId))
     .returning();
 
   if (app.userId) {
     await db.insert(notificationsTable).values({
       userId: app.userId,
-      title: "Aplikasyon rejte",
-      message: `Nou regret enfòme ou ke aplikasyon kont Pyram Sterling Bank ou a te rejte.${notes ? " Rezon: " + notes : " Kontakte nou pou plis enfòmasyon."}`,
+      title: "Randevou rejte",
+      message: `Nou regret enfòme ou ke randevou pou ouvèti kont Pyram Sterling Bank ou a te rejte.${reason ? " Rezon: " + reason : " Kontakte nou pou plis enfòmasyon."}`,
       isRead: false,
       type: "error",
     });

@@ -3,7 +3,14 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./users";
 
-export const applicationStatusEnum = pgEnum("application_status", ["pending", "approved", "rejected"]);
+export const applicationStatusEnum = pgEnum("application_status", [
+  "pending",
+  "approved",
+  "rejected",
+  "confirmed",
+  "rescheduled",
+  "completed",
+]);
 
 export const accountApplicationsTable = pgTable("account_applications", {
   id: serial("id").primaryKey(),
@@ -16,13 +23,18 @@ export const accountApplicationsTable = pgTable("account_applications", {
   appointmentTime: text("appointment_time").notNull(),
   status: applicationStatusEnum("status").notNull().default("pending"),
   notes: text("notes"),
+  rejectionReason: text("rejection_reason"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   approvedAt: timestamp("approved_at", { withTimezone: true }),
   rejectedAt: timestamp("rejected_at", { withTimezone: true }),
+  confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+  rescheduledAt: timestamp("rescheduled_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
 });
 
 export const insertApplicationSchema = createInsertSchema(accountApplicationsTable).omit({
   id: true, createdAt: true, approvedAt: true, rejectedAt: true,
+  confirmedAt: true, rescheduledAt: true, completedAt: true, rejectionReason: true,
 });
 export type InsertApplication = z.infer<typeof insertApplicationSchema>;
 export type AccountApplication = typeof accountApplicationsTable.$inferSelect;

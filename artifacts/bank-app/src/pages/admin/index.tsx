@@ -71,7 +71,7 @@ export default function AdminDashboardPage() {
             title="Aplikasyon an Atant"
             value={statsLoading ? undefined : (stats as any)?.pendingApplications ?? pendingApps.length}
             icon={FileText}
-            sub={`${apps.filter(a => a.status === "approved").length} apwouve`}
+            sub={`${apps.filter(a => a.status === "completed" || a.status === "approved").length} konplete`}
             href="/admin/applications"
           />
         </div>

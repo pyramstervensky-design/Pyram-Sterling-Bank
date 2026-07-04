@@ -19,9 +19,13 @@ function formatApplication(a: typeof accountApplicationsTable.$inferSelect) {
     appointmentTime: a.appointmentTime,
     status: a.status,
     notes: a.notes ?? null,
+    rejectionReason: a.rejectionReason ?? null,
     createdAt: a.createdAt.toISOString(),
     approvedAt: a.approvedAt?.toISOString() ?? null,
     rejectedAt: a.rejectedAt?.toISOString() ?? null,
+    confirmedAt: a.confirmedAt?.toISOString() ?? null,
+    rescheduledAt: a.rescheduledAt?.toISOString() ?? null,
+    completedAt: a.completedAt?.toISOString() ?? null,
   };
 }
 
@@ -56,8 +60,9 @@ router.post("/", requireAuth, async (req, res) => {
     .orderBy(desc(accountApplicationsTable.createdAt))
     .limit(1);
 
-  if (existingApp && existingApp.status === "pending") {
-    res.status(400).json({ error: "Ou deja gen yon aplikasyon an atant" });
+  const openStatuses = ["pending", "confirmed", "rescheduled"];
+  if (existingApp && openStatuses.includes(existingApp.status)) {
+    res.status(400).json({ error: "Ou deja gen yon randevou an kou" });
     return;
   }
 

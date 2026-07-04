@@ -532,11 +532,11 @@ paths:
                 items:
                   $ref: "#/components/schemas/Application"
 
-  /admin/applications/{id}/approve:
+  /admin/applications/{id}/confirm:
     post:
-      operationId: adminApproveApplication
+      operationId: adminConfirmApplication
       tags: [admin]
-      summary: Admin — approve an account application (creates Kanè)
+      summary: Admin — accept/confirm an appointment
       parameters:
         - name: id
           in: path
@@ -551,7 +551,57 @@ paths:
               $ref: "#/components/schemas/ApplicationDecision"
       responses:
         "200":
-          description: Application approved
+          description: Appointment confirmed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+
+  /admin/applications/{id}/reschedule:
+    post:
+      operationId: adminRescheduleApplication
+      tags: [admin]
+      summary: Admin — reschedule an appointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RescheduleInput"
+      responses:
+        "200":
+          description: Appointment rescheduled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+
+  /admin/applications/{id}/complete:
+    post:
+      operationId: adminCompleteApplication
+      tags: [admin]
+      summary: Admin — complete an appointment (creates Kanè account)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationDecision"
+      responses:
+        "200":
+          description: Appointment completed and account created
           content:
             application/json:
               schema:
@@ -561,7 +611,7 @@ paths:
     post:
       operationId: adminRejectApplication
       tags: [admin]
-      summary: Admin — reject an account application
+      summary: Admin — reject an appointment
       parameters:
         - name: id
           in: path
@@ -573,10 +623,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ApplicationDecision"
+              $ref: "#/components/schemas/RejectInput"
       responses:
         "200":
-          description: Application rejected
+          description: Appointment rejected
           content:
             application/json:
               schema:
@@ -878,11 +928,15 @@ components:
         nationalId:      { type: string }
         appointmentDate: { type: string }
         appointmentTime: { type: string }
-        status:          { type: string, enum: [pending, approved, rejected] }
+        status:          { type: string, enum: [pending, approved, rejected, confirmed, rescheduled, completed] }
         notes:           { type: ["string", "null"] }
+        rejectionReason: { type: ["string", "null"] }
         createdAt:       { type: string }
         approvedAt:      { type: ["string", "null"] }
         rejectedAt:      { type: ["string", "null"] }
+        confirmedAt:     { type: ["string", "null"] }
+        rescheduledAt:   { type: ["string", "null"] }
+        completedAt:     { type: ["string", "null"] }
 
     ApplicationInput:
       type: object
@@ -899,6 +953,18 @@ components:
       type: object
       properties:
         notes: { type: string }
+
+    RejectInput:
+      type: object
+      properties:
+        reason: { type: string }
+
+    RescheduleInput:
+      type: object
+      required: [appointmentDate, appointmentTime]
+      properties:
+        appointmentDate: { type: string }
+        appointmentTime: { type: string }
 
     Notification:
       type: object

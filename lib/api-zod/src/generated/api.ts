@@ -720,27 +720,31 @@ export const AdminListApplicationsResponseItem = zod.object({
   "nationalId": zod.string(),
   "appointmentDate": zod.string(),
   "appointmentTime": zod.string(),
-  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'confirmed', 'rescheduled', 'completed']),
   "notes": zod.string().nullish(),
+  "rejectionReason": zod.string().nullish(),
   "createdAt": zod.string(),
   "approvedAt": zod.string().nullish(),
-  "rejectedAt": zod.string().nullish()
+  "rejectedAt": zod.string().nullish(),
+  "confirmedAt": zod.string().nullish(),
+  "rescheduledAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish()
 })
 export const AdminListApplicationsResponse = zod.array(AdminListApplicationsResponseItem)
 
 
 /**
- * @summary Admin — approve an account application (creates Kanè)
+ * @summary Admin — accept/confirm an appointment
  */
-export const AdminApproveApplicationParams = zod.object({
+export const AdminConfirmApplicationParams = zod.object({
   "id": zod.coerce.number()
 })
 
-export const AdminApproveApplicationBody = zod.object({
+export const AdminConfirmApplicationBody = zod.object({
   "notes": zod.string().optional()
 })
 
-export const AdminApproveApplicationResponse = zod.object({
+export const AdminConfirmApplicationResponse = zod.object({
   "id": zod.number(),
   "userId": zod.number().nullish(),
   "firstName": zod.string(),
@@ -749,23 +753,92 @@ export const AdminApproveApplicationResponse = zod.object({
   "nationalId": zod.string(),
   "appointmentDate": zod.string(),
   "appointmentTime": zod.string(),
-  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'confirmed', 'rescheduled', 'completed']),
   "notes": zod.string().nullish(),
+  "rejectionReason": zod.string().nullish(),
   "createdAt": zod.string(),
   "approvedAt": zod.string().nullish(),
-  "rejectedAt": zod.string().nullish()
+  "rejectedAt": zod.string().nullish(),
+  "confirmedAt": zod.string().nullish(),
+  "rescheduledAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish()
 })
 
 
 /**
- * @summary Admin — reject an account application
+ * @summary Admin — reschedule an appointment
+ */
+export const AdminRescheduleApplicationParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminRescheduleApplicationBody = zod.object({
+  "appointmentDate": zod.string(),
+  "appointmentTime": zod.string()
+})
+
+export const AdminRescheduleApplicationResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number().nullish(),
+  "firstName": zod.string(),
+  "lastName": zod.string(),
+  "phone": zod.string(),
+  "nationalId": zod.string(),
+  "appointmentDate": zod.string(),
+  "appointmentTime": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'confirmed', 'rescheduled', 'completed']),
+  "notes": zod.string().nullish(),
+  "rejectionReason": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "approvedAt": zod.string().nullish(),
+  "rejectedAt": zod.string().nullish(),
+  "confirmedAt": zod.string().nullish(),
+  "rescheduledAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Admin — complete an appointment (creates Kanè account)
+ */
+export const AdminCompleteApplicationParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminCompleteApplicationBody = zod.object({
+  "notes": zod.string().optional()
+})
+
+export const AdminCompleteApplicationResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number().nullish(),
+  "firstName": zod.string(),
+  "lastName": zod.string(),
+  "phone": zod.string(),
+  "nationalId": zod.string(),
+  "appointmentDate": zod.string(),
+  "appointmentTime": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'confirmed', 'rescheduled', 'completed']),
+  "notes": zod.string().nullish(),
+  "rejectionReason": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "approvedAt": zod.string().nullish(),
+  "rejectedAt": zod.string().nullish(),
+  "confirmedAt": zod.string().nullish(),
+  "rescheduledAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Admin — reject an appointment
  */
 export const AdminRejectApplicationParams = zod.object({
   "id": zod.coerce.number()
 })
 
 export const AdminRejectApplicationBody = zod.object({
-  "notes": zod.string().optional()
+  "reason": zod.string().optional()
 })
 
 export const AdminRejectApplicationResponse = zod.object({
@@ -777,11 +850,15 @@ export const AdminRejectApplicationResponse = zod.object({
   "nationalId": zod.string(),
   "appointmentDate": zod.string(),
   "appointmentTime": zod.string(),
-  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'confirmed', 'rescheduled', 'completed']),
   "notes": zod.string().nullish(),
+  "rejectionReason": zod.string().nullish(),
   "createdAt": zod.string(),
   "approvedAt": zod.string().nullish(),
-  "rejectedAt": zod.string().nullish()
+  "rejectedAt": zod.string().nullish(),
+  "confirmedAt": zod.string().nullish(),
+  "rescheduledAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish()
 })
 
 
@@ -806,11 +883,15 @@ export const SubmitApplicationResponse = zod.object({
   "nationalId": zod.string(),
   "appointmentDate": zod.string(),
   "appointmentTime": zod.string(),
-  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'confirmed', 'rescheduled', 'completed']),
   "notes": zod.string().nullish(),
+  "rejectionReason": zod.string().nullish(),
   "createdAt": zod.string(),
   "approvedAt": zod.string().nullish(),
-  "rejectedAt": zod.string().nullish()
+  "rejectedAt": zod.string().nullish(),
+  "confirmedAt": zod.string().nullish(),
+  "rescheduledAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish()
 })
 
 
@@ -826,11 +907,15 @@ export const GetMyApplicationResponse = zod.object({
   "nationalId": zod.string(),
   "appointmentDate": zod.string(),
   "appointmentTime": zod.string(),
-  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'confirmed', 'rescheduled', 'completed']),
   "notes": zod.string().nullish(),
+  "rejectionReason": zod.string().nullish(),
   "createdAt": zod.string(),
   "approvedAt": zod.string().nullish(),
-  "rejectedAt": zod.string().nullish()
+  "rejectedAt": zod.string().nullish(),
+  "confirmedAt": zod.string().nullish(),
+  "rescheduledAt": zod.string().nullish(),
+  "completedAt": zod.string().nullish()
 })
 
 

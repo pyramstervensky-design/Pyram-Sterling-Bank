@@ -39,7 +39,9 @@ import type {
   Partner,
   PartnerApplication,
   PartnerPaymentInput,
+  RejectInput,
   RepaymentInput,
+  RescheduleInput,
   Transaction,
   TransactionSummary,
   TransferInput,
@@ -2087,21 +2089,21 @@ export function useAdminListApplications<TData = Awaited<ReturnType<typeof admin
 
 
 
-export const getAdminApproveApplicationUrl = (id: number,) => {
+export const getAdminConfirmApplicationUrl = (id: number,) => {
 
 
 
 
-  return `/api/admin/applications/${id}/approve`
+  return `/api/admin/applications/${id}/confirm`
 }
 
 /**
- * @summary Admin — approve an account application (creates Kanè)
+ * @summary Admin — accept/confirm an appointment
  */
-export const adminApproveApplication = async (id: number,
+export const adminConfirmApplication = async (id: number,
     applicationDecision?: ApplicationDecision, options?: RequestInit): Promise<Application> => {
 
-  return customFetch<Application>(getAdminApproveApplicationUrl(id),
+  return customFetch<Application>(getAdminConfirmApplicationUrl(id),
   {
     ...options,
     method: 'POST',
@@ -2113,11 +2115,11 @@ export const adminApproveApplication = async (id: number,
 
 
 
-export const getAdminApproveApplicationMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminApproveApplication>>, TError,{id: number;data?: BodyType<ApplicationDecision>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof adminApproveApplication>>, TError,{id: number;data?: BodyType<ApplicationDecision>}, TContext> => {
+export const getAdminConfirmApplicationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminConfirmApplication>>, TError,{id: number;data?: BodyType<ApplicationDecision>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminConfirmApplication>>, TError,{id: number;data?: BodyType<ApplicationDecision>}, TContext> => {
 
-const mutationKey = ['adminApproveApplication'];
+const mutationKey = ['adminConfirmApplication'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -2127,10 +2129,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminApproveApplication>>, {id: number;data?: BodyType<ApplicationDecision>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminConfirmApplication>>, {id: number;data?: BodyType<ApplicationDecision>}> = (props) => {
           const {id,data} = props ?? {};
 
-          return  adminApproveApplication(id,data,requestOptions)
+          return  adminConfirmApplication(id,data,requestOptions)
         }
 
 
@@ -2140,22 +2142,164 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type AdminApproveApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof adminApproveApplication>>>
-    export type AdminApproveApplicationMutationBody = BodyType<ApplicationDecision> | undefined
-    export type AdminApproveApplicationMutationError = ErrorType<unknown>
+    export type AdminConfirmApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof adminConfirmApplication>>>
+    export type AdminConfirmApplicationMutationBody = BodyType<ApplicationDecision> | undefined
+    export type AdminConfirmApplicationMutationError = ErrorType<unknown>
 
     /**
- * @summary Admin — approve an account application (creates Kanè)
+ * @summary Admin — accept/confirm an appointment
  */
-export const useAdminApproveApplication = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminApproveApplication>>, TError,{id: number;data?: BodyType<ApplicationDecision>}, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useAdminConfirmApplication = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminConfirmApplication>>, TError,{id: number;data?: BodyType<ApplicationDecision>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof adminApproveApplication>>,
+        Awaited<ReturnType<typeof adminConfirmApplication>>,
         TError,
         {id: number;data?: BodyType<ApplicationDecision>},
         TContext
       > => {
-      return useMutation(getAdminApproveApplicationMutationOptions(options));
+      return useMutation(getAdminConfirmApplicationMutationOptions(options));
+    }
+
+export const getAdminRescheduleApplicationUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/applications/${id}/reschedule`
+}
+
+/**
+ * @summary Admin — reschedule an appointment
+ */
+export const adminRescheduleApplication = async (id: number,
+    rescheduleInput: RescheduleInput, options?: RequestInit): Promise<Application> => {
+
+  return customFetch<Application>(getAdminRescheduleApplicationUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(rescheduleInput)
+  }
+);}
+
+
+
+
+export const getAdminRescheduleApplicationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRescheduleApplication>>, TError,{id: number;data: BodyType<RescheduleInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminRescheduleApplication>>, TError,{id: number;data: BodyType<RescheduleInput>}, TContext> => {
+
+const mutationKey = ['adminRescheduleApplication'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminRescheduleApplication>>, {id: number;data: BodyType<RescheduleInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  adminRescheduleApplication(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminRescheduleApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof adminRescheduleApplication>>>
+    export type AdminRescheduleApplicationMutationBody = BodyType<RescheduleInput>
+    export type AdminRescheduleApplicationMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Admin — reschedule an appointment
+ */
+export const useAdminRescheduleApplication = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRescheduleApplication>>, TError,{id: number;data: BodyType<RescheduleInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminRescheduleApplication>>,
+        TError,
+        {id: number;data: BodyType<RescheduleInput>},
+        TContext
+      > => {
+      return useMutation(getAdminRescheduleApplicationMutationOptions(options));
+    }
+
+export const getAdminCompleteApplicationUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/applications/${id}/complete`
+}
+
+/**
+ * @summary Admin — complete an appointment (creates Kanè account)
+ */
+export const adminCompleteApplication = async (id: number,
+    applicationDecision?: ApplicationDecision, options?: RequestInit): Promise<Application> => {
+
+  return customFetch<Application>(getAdminCompleteApplicationUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(applicationDecision)
+  }
+);}
+
+
+
+
+export const getAdminCompleteApplicationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCompleteApplication>>, TError,{id: number;data?: BodyType<ApplicationDecision>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminCompleteApplication>>, TError,{id: number;data?: BodyType<ApplicationDecision>}, TContext> => {
+
+const mutationKey = ['adminCompleteApplication'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCompleteApplication>>, {id: number;data?: BodyType<ApplicationDecision>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  adminCompleteApplication(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminCompleteApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof adminCompleteApplication>>>
+    export type AdminCompleteApplicationMutationBody = BodyType<ApplicationDecision> | undefined
+    export type AdminCompleteApplicationMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Admin — complete an appointment (creates Kanè account)
+ */
+export const useAdminCompleteApplication = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCompleteApplication>>, TError,{id: number;data?: BodyType<ApplicationDecision>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminCompleteApplication>>,
+        TError,
+        {id: number;data?: BodyType<ApplicationDecision>},
+        TContext
+      > => {
+      return useMutation(getAdminCompleteApplicationMutationOptions(options));
     }
 
 export const getAdminRejectApplicationUrl = (id: number,) => {
@@ -2167,17 +2311,17 @@ export const getAdminRejectApplicationUrl = (id: number,) => {
 }
 
 /**
- * @summary Admin — reject an account application
+ * @summary Admin — reject an appointment
  */
 export const adminRejectApplication = async (id: number,
-    applicationDecision?: ApplicationDecision, options?: RequestInit): Promise<Application> => {
+    rejectInput?: RejectInput, options?: RequestInit): Promise<Application> => {
 
   return customFetch<Application>(getAdminRejectApplicationUrl(id),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(applicationDecision)
+    body: JSON.stringify(rejectInput)
   }
 );}
 
@@ -2185,8 +2329,8 @@ export const adminRejectApplication = async (id: number,
 
 
 export const getAdminRejectApplicationMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRejectApplication>>, TError,{id: number;data?: BodyType<ApplicationDecision>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof adminRejectApplication>>, TError,{id: number;data?: BodyType<ApplicationDecision>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRejectApplication>>, TError,{id: number;data?: BodyType<RejectInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminRejectApplication>>, TError,{id: number;data?: BodyType<RejectInput>}, TContext> => {
 
 const mutationKey = ['adminRejectApplication'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -2198,7 +2342,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminRejectApplication>>, {id: number;data?: BodyType<ApplicationDecision>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminRejectApplication>>, {id: number;data?: BodyType<RejectInput>}> = (props) => {
           const {id,data} = props ?? {};
 
           return  adminRejectApplication(id,data,requestOptions)
@@ -2212,18 +2356,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type AdminRejectApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof adminRejectApplication>>>
-    export type AdminRejectApplicationMutationBody = BodyType<ApplicationDecision> | undefined
+    export type AdminRejectApplicationMutationBody = BodyType<RejectInput> | undefined
     export type AdminRejectApplicationMutationError = ErrorType<unknown>
 
     /**
- * @summary Admin — reject an account application
+ * @summary Admin — reject an appointment
  */
 export const useAdminRejectApplication = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRejectApplication>>, TError,{id: number;data?: BodyType<ApplicationDecision>}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRejectApplication>>, TError,{id: number;data?: BodyType<RejectInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof adminRejectApplication>>,
         TError,
-        {id: number;data?: BodyType<ApplicationDecision>},
+        {id: number;data?: BodyType<RejectInput>},
         TContext
       > => {
       return useMutation(getAdminRejectApplicationMutationOptions(options));

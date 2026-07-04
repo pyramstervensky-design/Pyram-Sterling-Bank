@@ -5,7 +5,7 @@ import { usersTable } from "./users";
 
 export const kaneTable = pgTable("kane", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  userId: integer("user_id").notNull().unique().references(() => usersTable.id, { onDelete: "cascade" }),
   accountNumber: text("account_number").notNull().unique(),
   cardNumber: text("card_number").notNull().unique(),
   cardExpiry: text("card_expiry").notNull(),

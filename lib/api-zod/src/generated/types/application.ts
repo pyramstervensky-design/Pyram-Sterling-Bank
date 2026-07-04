@@ -20,9 +20,17 @@ export interface Application {
   status: ApplicationStatus;
   /** @nullable */
   notes?: string | null;
+  /** @nullable */
+  rejectionReason?: string | null;
   createdAt: string;
   /** @nullable */
   approvedAt?: string | null;
   /** @nullable */
   rejectedAt?: string | null;
+  /** @nullable */
+  confirmedAt?: string | null;
+  /** @nullable */
+  rescheduledAt?: string | null;
+  /** @nullable */
+  completedAt?: string | null;
 }
