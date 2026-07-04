@@ -61,7 +61,7 @@ export default function ApplyPage() {
     );
   }
 
-  if (myApp && myApp.status === "approved") {
+  if (myApp && (myApp.status === "approved" || myApp.status === "completed")) {
     return (
       <AppLayout>
         <div className="max-w-lg mx-auto text-center py-16">
@@ -69,28 +69,37 @@ export default function ApplyPage() {
             <CheckCircle2 className="w-10 h-10 text-emerald-600" />
           </div>
           <h1 className="text-2xl font-serif text-slate-900 mb-3">Kont ou aktive!</h1>
-          <p className="text-slate-500 mb-8">Aplikasyon ou an apwouve. Kont Pyram Sterling Bank ou a aktif kounye a.</p>
+          <p className="text-slate-500 mb-8">Randevou ou an konplete. Kont Pyram Sterling Bank ou a aktif kounye a.</p>
           <Button asChild><Link href="/dashboard">Al nan Tablo de bò</Link></Button>
         </div>
       </AppLayout>
     );
   }
 
-  if (myApp && myApp.status === "pending") {
+  if (myApp && (myApp.status === "pending" || myApp.status === "confirmed" || myApp.status === "rescheduled")) {
+    const isConfirmed = myApp.status === "confirmed" || myApp.status === "rescheduled";
     return (
       <AppLayout>
         <div className="max-w-lg mx-auto text-center py-16">
-          <div className="w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-6">
-            <Clock className="w-10 h-10 text-amber-600" />
+          <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${isConfirmed ? "bg-emerald-100" : "bg-amber-100"}`}>
+            {isConfirmed ? (
+              <CheckCircle2 className="w-10 h-10 text-emerald-600" />
+            ) : (
+              <Clock className="w-10 h-10 text-amber-600" />
+            )}
           </div>
-          <h1 className="text-2xl font-serif text-slate-900 mb-3">Aplikasyon an Atant</h1>
+          <h1 className="text-2xl font-serif text-slate-900 mb-3">
+            {isConfirmed ? "Randevou ou Konfime" : "Aplikasyon an Atant"}
+          </h1>
           <p className="text-slate-500 mb-4">
-            Aplikasyon ou an soumèt avèk siksè. Nou ap revize enfòmasyon ou yo.
+            {isConfirmed
+              ? "Randevou ou an konfime. Tanpri parèt nan bank la nan dat ak lè ki endike a."
+              : "Aplikasyon ou an soumèt avèk siksè. Nou ap revize enfòmasyon ou yo."}
           </p>
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-left mb-8">
-            <p className="text-sm font-semibold text-amber-800 mb-1">Randevou ou:</p>
-            <p className="text-sm text-amber-700">{myApp.appointmentDate} a {myApp.appointmentTime}</p>
-            <p className="text-xs text-amber-600 mt-2">
+          <div className={`border rounded-xl p-4 text-left mb-8 ${isConfirmed ? "bg-emerald-50 border-emerald-200" : "bg-amber-50 border-amber-200"}`}>
+            <p className={`text-sm font-semibold mb-1 ${isConfirmed ? "text-emerald-800" : "text-amber-800"}`}>Randevou ou:</p>
+            <p className={`text-sm ${isConfirmed ? "text-emerald-700" : "text-amber-700"}`}>{myApp.appointmentDate} a {myApp.appointmentTime}</p>
+            <p className={`text-xs mt-2 ${isConfirmed ? "text-emerald-600" : "text-amber-600"}`}>
               Tanpri parèt nan bank la ak yon ID nasyonal valid ak frè ouvèti kont (500 HTG) an lajan kach.
             </p>
           </div>
@@ -107,12 +116,29 @@ export default function ApplyPage() {
           <div className="w-20 h-20 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-6">
             <XCircle className="w-10 h-10 text-rose-600" />
           </div>
-          <h1 className="text-2xl font-serif text-slate-900 mb-3">Aplikasyon Rejte</h1>
+          <h1 className="text-2xl font-serif text-slate-900 mb-3">Randevou Rejte</h1>
           <p className="text-slate-500 mb-4">
-            Nou regret enfòme ou ke aplikasyon ou an pa te apwouve.
-            {myApp.notes && <span className="block mt-2 text-slate-600">Rezon: {myApp.notes}</span>}
+            Nou regret enfòme ou ke randevou ou an pa te apwouve.
+            {(myApp.rejectionReason || myApp.notes) && (
+              <span className="block mt-2 text-slate-600">Rezon: {myApp.rejectionReason || myApp.notes}</span>
+            )}
           </p>
           <p className="text-sm text-slate-400 mb-8">Kontakte nou pou plis enfòmasyon.</p>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (myApp) {
+    return (
+      <AppLayout>
+        <div className="max-w-lg mx-auto text-center py-16">
+          <div className="w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-6">
+            <Clock className="w-10 h-10 text-amber-600" />
+          </div>
+          <h1 className="text-2xl font-serif text-slate-900 mb-3">Randevou an kou</h1>
+          <p className="text-slate-500 mb-8">Ou gen yon randevou k ap trete kounye a. Yo pral kontakte ou byento.</p>
+          <Button asChild><Link href="/dashboard">Al nan Tablo de bò</Link></Button>
         </div>
       </AppLayout>
     );
@@ -150,7 +176,7 @@ export default function ApplyPage() {
             <div className="bg-white/10 rounded-xl p-4">
               <CreditCard className="w-5 h-5 text-emerald-400 mb-2" />
               <p className="text-sm font-medium">250 HTG</p>
-              <p className="text-xs text-slate-400 mt-1">Depoze kòm balans inisyal nan kont ou apre apwobasyon</p>
+              <p className="text-xs text-slate-400 mt-1">Depoze kòm balans inisyal nan kont ou apre randevou a konplete</p>
             </div>
           </div>
         </div>
