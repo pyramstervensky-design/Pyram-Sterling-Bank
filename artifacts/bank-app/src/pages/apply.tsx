@@ -30,7 +30,7 @@ export default function ApplyPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: myApp, isLoading: appLoading } = useGetMyApplication({ query: { retry: false } });
+  const { data: myApp, isLoading: appLoading } = useGetMyApplication({ query: { retry: false } as any });
 
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>();
   const agreedToFee = watch("agreedToFee");

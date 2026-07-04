@@ -7,7 +7,7 @@ import { format } from "date-fns";
 export function NotificationsBell() {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
-  const { data: notifications = [] } = useListNotifications({ query: { refetchInterval: 30_000 } });
+  const { data: notifications = [] } = useListNotifications({ query: { refetchInterval: 30_000 } as any });
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const markRead = useMarkNotificationRead({
@@ -55,7 +55,7 @@ export function NotificationsBell() {
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
                   <button
-                    onClick={() => markAll.mutate({})}
+                    onClick={() => markAll.mutate(undefined as any)}
                     className="text-xs text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1"
                   >
                     <CheckCheck className="w-3.5 h-3.5" />

@@ -1,0 +1,296 @@
+Redesign the entire Customer Dashboard of Pyram Sterling Bank.
+
+Do NOT copy Bank of America.
+
+Instead, create a completely original premium banking interface inspired by the clean and professional experience of modern commercial banks.
+
+The design must be elegant, simple, responsive, and feel like a real banking application.
+
+Use the official Pyram Sterling Bank colors:
+
+• Dark Blue
+• Gold
+• Sky Blue
+
+Do NOT use the Bank of America red color.
+
+The dashboard sections must appear in this exact order:
+
+==================================================
+1. CUSTOMER ACCOUNT
+==================================================
+
+Title:
+
+Kont Kliyan
+
+Below the title place a thin Sky Blue divider.
+
+Display:
+
+• Customer Full Name
+• Account Number (Kanè)
+
+Example:
+
+Kont Kliyan
+
+────────────────────
+
+Pyram Stervensky
+
+Kanè:
+PSB-0000001234
+
+Use a clean minimalist layout.
+
+==================================================
+2. MAIN BANK ACCOUNT
+==================================================
+
+Place a thin Gold + Blue divider above the section.
+
+Title:
+
+Kont Bankè
+
+Below the title display:
+
+Pyram Sterling Bank
+Official Logo
+
+Below display:
+
+Kont Prensipal
+
+On the right side display the customer's current account balance.
+
+Example:
+
+Kont Prensipal
+
+                           G 25,000.00
+
+Keep the layout very clean with generous spacing.
+
+==================================================
+3. DEBIT CARD
+==================================================
+
+Place another Gold + Blue divider.
+
+Title:
+
+Kat Debi
+
+Below display:
+
+Pyram Sterling Bank
+Official Logo
+
+Customer Name
+
+On the right display:
+
+Current Balance
+
+The balance displayed on the Debit Card must always match the customer's current account balance.
+
+Example:
+
+Pyram Stervensky
+
+                           G 25,000.00
+
+==================================================
+4. CREDIT SCORE
+==================================================
+
+Place another Gold + Blue divider.
+
+Title:
+
+Skò Kredi
+
+Below display:
+
+Pyram Sterling Bank
+Official Logo
+
+Create a professional Circular Credit Score component.
+
+The score must NOT appear inside a rectangular card.
+
+Instead display:
+
+A circular progress ring.
+
+Inside the circle display the customer's credit score.
+
+Example:
+
+          ⭕
+        650
+      (inside)
+
+The ring around the score must animate smoothly whenever the score changes.
+
+The ring color must change automatically according to the score.
+
+300–499
+
+Red
+
+Status:
+Move
+
+500–649
+
+Yellow
+
+Status:
+Pasab
+
+650–749
+
+Green
+
+Status:
+Bon
+
+750–850
+
+Blue + Gold
+
+Status:
+Ekselan
+
+To the RIGHT of the circle display ONLY:
+
+● Move
+
+or
+
+● Pasab
+
+or
+
+● Bon
+
+or
+
+● Ekselan
+
+Do NOT use large badges.
+
+Do NOT use colored rectangles.
+
+Only use a small colored dot beside the status.
+
+Example:
+
+⭕ 650              ● Bon
+
+Keep the section clean and premium.
+
+==================================================
+5. LOAN
+==================================================
+
+This section must ONLY appear if the customer currently has an active loan.
+
+If the customer has no active loan this entire section must remain hidden.
+
+Place another Gold + Blue divider.
+
+Title:
+
+Prè
+
+Below display:
+
+Pyram Sterling Bank
+Official Logo
+
+Customer Name
+
+On the right display:
+
+Total Loan Amount
+
+Example:
+
+Pyram Stervensky
+
+                          G 100,000.00
+
+Below display:
+
+Already Paid
+
+On the right:
+
+G 35,000.00
+
+Below display:
+
+Remaining Balance
+
+On the right:
+
+G 65,000.00
+
+Below display:
+
+Loan Status
+
+Examples:
+
+Active
+
+Completed
+
+Late
+
+Default
+
+==================================================
+DESIGN REQUIREMENTS
+==================================================
+
+The interface must feel like a premium commercial banking application.
+
+Keep everything clean.
+
+Minimal.
+
+Elegant.
+
+Professional.
+
+No oversized cards.
+
+No unnecessary shadows.
+
+No unnecessary animations.
+
+Perfect spacing.
+
+Rounded corners.
+
+Responsive on:
+
+• Desktop
+• iPhone
+• Android
+• Tablets
+
+No horizontal scrolling.
+
+No zoom required.
+
+No text overflow.
+
+Everything must resize automatically for small screens.
+
+The dashboard should become the new standard design for Pyram Sterling Bank and should look modern, trustworthy, premium, and unique without copying any existing banking application.
