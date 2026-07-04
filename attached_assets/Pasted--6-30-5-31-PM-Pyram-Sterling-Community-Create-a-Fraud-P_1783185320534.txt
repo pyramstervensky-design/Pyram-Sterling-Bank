@@ -1,0 +1,963 @@
+[6/30, 5:31 PM] Pyram Sterling Community: Create a Fraud Protection and Security System for Pyram Sterling Bank.
+
+Implement a secure PIN-based authentication system:
+
+- Each user must create a 4–6 digit PIN.
+- PIN is required for login, transfers, and loan actions.
+- After 3 failed PIN attempts, the account must be temporarily locked.
+
+Add biometric authentication support (if device supports it):
+- Face ID
+- Fingerprint
+
+Implement a fraud detection system that monitors:
+- Multiple rapid transactions
+- Large unusual transfers
+- Login from new devices
+- Suspicious activity patterns
+
+If suspicious activity is detected:
+- Flag account as "Suspicious"
+- Temporarily block sensitive actions
+- Notify both user and admin
+
+Track device information:
+- Device ID
+- Browser or phone type
+- Approximate location
+
+If login is from a new device:
+- Require additional verification
+
+All transactions must require:
+- PIN verification
+- Balance validation
+- Fraud risk check
+
+The system must prioritize security and protect against unauthorized access or fraudulent transfers.
+[6/30, 5:37 PM] Pyram Sterling Community: Implement a secure Cash Withdrawal and Money Transfer limit system for Pyram Sterling Bank.
+
+Rules:
+
+1. Users can withdraw a maximum of 5,000,000 HTG in total lifetime balance withdrawals.
+2. Daily withdrawal limit is 200,000 HTG per day.
+3. Money transfers between users are also limited to 200,000 HTG per transaction and per day total.
+
+System must:
+
+- Track daily usage for each user and reset every 24 hours.
+- Block any transaction exceeding 200,000 HTG.
+- Prevent withdrawals or transfers if daily limit is exceeded.
+- Validate sufficient balance before any transaction.
+- Require PIN verification for all withdrawals and transfers.
+
+Security:
+
+- Log all transactions with timestamp.
+- Detect and prevent suspicious rapid transactions.
+- Temporarily block account if abnormal activity is detected.
+
+The system must enforce limits strictly and ensure no user can bypass restrictions.
+[6/30, 5:53 PM] Pyram Sterling Community: Create a Business Account Registration system for Pyram Sterling Bank.
+
+Add a "Create Business Account" page where companies can register.
+
+Required fields:
+- Company Name
+- Business Registration ID (optional)
+- Location
+- Business Email
+- Phone Number
+- Authorized Person Name
+- Password or Business PIN
+
+After registration:
+- Automatically generate a Business Account (Kanè Biznis)
+- Example format: PSB-BIZ-XXXXXX
+- Initialize balance at 0
+
+System must support two modes:
+1. Simple Mode: immediate activation with limited features
+2. Verified Mode: requires admin approval before full access
+
+Business accounts must have access to:
+- Payroll system
+- Bulk payments
+- Employee management
+- Transaction history
+
+Rules:
+- One business per account
+- Prevent duplicate business registrations
+- Log all actions for security
+[6/30, 5:55 PM] Pyram Sterling Community: Create a complete Business Dashboard for Pyram Sterling Bank.
+
+The dashboard must include:
+
+- Business overview (name, balance, employees, payroll history)
+- Business wallet section (account number, balance, pending payments)
+- Employee management system (add, edit, deactivate employees)
+- Payroll system (run payroll button, salary distribution)
+- Bulk payment system (manual list or CSV upload)
+- Transaction history (recipient, amount, date, status)
+
+Add a Business Verification System:
+
+Statuses:
+- Pending
+- Verified
+- Rejected
+
+Only verified businesses can access full features such as payroll and bulk payments.
+
+Security:
+- Only authorized business admin can perform payments
+- All transactions must be logged
+- PIN required for large payments
+- Fraud detection enabled
+
+System must be secure, professional, and similar to real banking platforms.
+[6/30, 5:59 PM] Pyram Sterling Community: Create an Automatic Monthly Payroll System for Pyram Sterling Bank.
+
+The system must allow businesses to automatically pay employees on a scheduled basis.
+
+Features:
+
+1. Payroll Modes:
+- Manual (Run Payroll button)
+- Automatic (system executes automatically)
+
+2. Schedule Options:
+- Weekly (7 days)
+- Bi-weekly (15 days)
+- Monthly (30 days)
+- Custom pay date selection
+
+3. Automatic Process:
+- On scheduled date, system calculates total payroll
+- Verifies business account balance
+- Deducts total salary from business account
+- Distributes payments to all employees automatically
+- Logs all transactions with timestamp
+
+4. Failure Handling:
+- If insufficient funds, cancel payroll
+- Mark payroll status as FAILED
+- Notify business admin
+
+5. Security:
+- Only verified business accounts can activate auto payroll
+- PIN required to enable/disable automation
+- All payroll actions must be logged
+
+6. History:
+- Show payroll history including date, total amount, employees paid, and status
+
+System must be fully automated, secure, and reliable.
+[6/30, 8:46 PM] Pyram Sterling Community: Build a “Richès (Wealth)” section for a fintech banking app called Pyram Sterling Bank.
+
+This section must be part of the main app navigation but separated from core banking operations.
+
+⸻
+
+🧭 STRUCTURE OF RICHÈS
+
+The Wealth section must contain ONLY 4 services:
+
+⸻
+
+1. 💰 LOANS (PRÈ)
+
+* Apply for loans
+* Check eligibility
+* View repayment schedules
+* Credit score impact display
+
+⸻
+
+2. 🤝 PARTNERS (PATNÈ)
+
+* Business services
+* Payroll system access
+* Bulk payment tools
+* Corporate financial services
+
+⸻
+
+3. 🆕 OPEN PERSONAL ACCOUNT (OUVÈ YON KONT)
+
+This is an onboarding feature.
+
+Form must include:
+
+* First Name
+* Last Name
+* Phone Number
+* Haitian National ID
+* Agreement checkbox
+* Account opening fee: 500 HTG
+* Appointment date & time selection
+
+After submission:
+
+* Request goes to admin approval dashboard
+* After approval:
+    * Generate Kanè (account number)
+    * Generate virtual card
+    * Activate account
+
+⸻
+
+4. 🏢 OPEN BUSINESS ACCOUNT (OUVÈ YON KONT BIZNIS)
+
+This is for companies.
+
+Form must include:
+
+* Company Name
+* Business Email
+* Phone Number
+* Authorized Person Name
+* Business Registration ID (optional)
+* Agreement checkbox
+
+💰 BUSINESS ACCOUNT FEES RULE:
+
+* Account opening fee: 1000 HTG
+* After successful approval:
+    * 500 HTG is automatically credited to the new business Kanè as starting balance
+    * Remaining 500 HTG is used as service/creation fee
+
+After submission:
+
+* Status = Pending
+* Admin must verify and approve
+* Once approved:
+    * Generate Business Account (Kanè Biznis)
+    * Activate business dashboard access
+    * Enable payroll and bulk payment tools
+
+⸻
+
+🎨 UI/UX REQUIREMENTS
+
+* Modern fintech design (Bank of America / Revolut style)
+* Clean card-based layout
+* White + blue gradient theme
+* Mobile-first design
+* Smooth animations
+* Fast loading and low data usage
+
+⸻
+
+🧭 WEALTH HOME SCREEN LAYOUT
+
+The Wealth page must display 4 cards:
+
+💰 Loans
+🤝 Partners
+🆕 Open Personal Account
+🏢 Open Business Account
+
+Each card must be clickable and lead to its respective flow.
+
+⸻
+
+🔐 SYSTEM RULES
+
+* Personal accounts require admin approval
+* Business accounts require verification before activation
+* All submissions must be logged
+* No user can access other users’ data
+* Security and validation required on all forms
+
+⸻
+
+🎯 GOAL
+
+The Wealth section must act as a financial onboarding hub and service center, clearly separated from core banking operations like transfers and dashboard activities.
+[7/1, 11:12 AM] Pyram Sterling Community: Build a complete Employee Role Management System for Pyram Sterling Bank.
+
+The application must use a single website and automatically display the correct dashboard based on the user's role after login.
+
+User Roles
+
+Support the following roles:
+
+Customer
+
+Teller (Cashier)
+
+Loan Officer
+
+Business Officer
+
+Administrator
+
+Each role must only have access to the features assigned to it.
+
+Customer Dashboard
+
+Customers can:
+
+View account balance
+
+View Kanè
+
+View virtual card
+
+Transfer money
+
+Apply for loans
+
+View transaction history
+
+Access the Wealth section
+
+Customers must never be able to view other customers' information.
+
+Teller Dashboard
+
+Create a dedicated Teller Dashboard.
+
+Tellers must be able to:
+
+Search customers by:
+
+Account Number (Kanè)
+
+Phone Number
+
+National ID
+
+QR Code or Barcode
+
+View customer account information
+
+Process cash deposits
+
+Process cash withdrawals
+
+Update the customer's Kanè after each transaction
+
+Print or generate a receipt
+
+View the customer's recent transactions
+
+Every teller transaction must:
+
+Update the customer's balance immediately
+
+Create a transaction record
+
+Record which teller performed the operation
+
+Record the date and time
+
+Require confirmation before processing
+
+Tellers must NOT be able to:
+
+Approve loans
+
+Modify customer information
+
+View system settings
+
+Access administrator functions
+
+Loan Officer Dashboard
+
+Loan Officers can:
+
+Review loan applications
+
+Approve or reject loans
+
+View repayment schedules
+
+View customer credit scores
+
+Loan Officers cannot access business management or system administration.
+
+Business Officer Dashboard
+
+Business Officers can:
+
+Review business account applications
+
+Approve or reject business accounts
+
+Manage payroll services
+
+Manage corporate customers
+
+Business Officers cannot manage personal customer accounts or system settings.
+
+Administrator Dashboard
+
+Administrators have full access to:
+
+Customers
+
+Employees
+
+Business accounts
+
+Loans
+
+Payroll
+
+Revenue
+
+Reports
+
+System settings
+
+Security
+
+Audit logs
+
+Administrators can create, edit, deactivate, and delete employee accounts.
+
+When creating an employee, the administrator must assign one of the available roles.
+
+Login Logic
+
+Use one login page for everyone.
+
+After login, automatically detect the user's role and redirect them to the correct dashboard:
+
+Customer → Customer Dashboard
+
+Teller → Teller Dashboard
+
+Loan Officer → Loan Officer Dashboard
+
+Business Officer → Business Officer Dashboard
+
+Administrator → Administrator Dashboard
+
+Audit & Security
+
+Log every employee action, including:
+
+Employee name
+
+Role
+
+Action performed
+
+Customer affected (if any)
+
+Date and time
+
+Device and IP address (if available)
+
+Never allow employees to access features outside their assigned role.
+
+The system must be secure, professional, and designed to match the standards of a real commercial bank.
+[7/1, 11:17 AM] Pyram Sterling Community: Build a complete Cash Management System for Pyram Sterling Bank.
+
+The Cash Management System must be available only to Administrators and authorized Tellers.
+
+The system must include the following modules:
+
+1. BANK CASH VAULT
+
+Create a secure Bank Cash Vault that represents the physical cash owned by the bank.
+
+The vault must support multiple currencies, including:
+
+HTG
+
+USD
+
+Display:
+
+Current HTG cash
+
+Current USD cash
+
+Total cash available
+
+Cash movement history
+
+Only Administrators can modify the Cash Vault.
+
+2. TELLER CASH DRAWERS
+
+Each Teller must have an individual Cash Drawer.
+
+Display:
+
+Teller Name
+
+Branch
+
+Current Cash Drawer Balance
+
+Opening Balance
+
+Closing Balance
+
+Drawer Status (Open / Closed)
+
+A Teller can only view and manage their own Cash Drawer.
+
+Administrators can view every Teller Cash Drawer.
+
+3. CASH ALLOCATION
+
+Administrators must be able to allocate physical cash from the Bank Cash Vault to a Teller Cash Drawer.
+
+Example:
+
+Cash Vault:
+25,000,000 HTG
+
+Allocate:
+
+500,000 HTG
+
+To:
+
+Teller Marie
+
+After confirmation:
+
+Cash Vault:
+24,500,000 HTG
+
+Marie Cash Drawer:
+500,000 HTG
+
+Every allocation must be recorded in the audit log.
+
+4. CASH DEPOSITS
+
+When a customer deposits cash:
+
+The Teller must:
+
+Search customer
+
+Enter deposit amount
+
+Confirm operation
+
+The system must:
+
+Increase customer account balance
+
+Increase Teller Cash Drawer balance
+
+Record transaction
+
+Record Teller name
+
+Record date and time
+
+5. CASH WITHDRAWALS
+
+When a customer withdraws cash:
+
+The Teller must:
+
+Search customer
+
+Verify identity
+
+Enter withdrawal amount
+
+Confirm operation
+
+The system must:
+
+Verify sufficient customer balance
+
+Decrease customer account balance
+
+Decrease Teller Cash Drawer balance
+
+Record transaction
+
+Record Teller name
+
+Record date and time
+
+If the Teller Cash Drawer does not contain enough physical cash, reject the transaction and display an error.
+
+6. OPENING A CASH DRAWER
+
+At the beginning of each workday:
+
+The Administrator allocates cash to each Teller.
+
+The Teller must confirm the opening balance before starting operations.
+
+Status becomes:
+
+OPEN
+
+7. CLOSING A CASH DRAWER
+
+At the end of the workday:
+
+The Teller counts physical cash.
+
+The system compares:
+
+Expected Cash
+
+vs
+
+Actual Cash
+
+If equal:
+
+Status:
+Balanced
+
+If different:
+
+Status:
+Difference Detected
+
+Display:
+
+Difference amount
+
+Shortage or Overage
+
+Notify the Administrator automatically.
+
+8. CASH MOVEMENT HISTORY
+
+Record every movement including:
+
+Allocation
+
+Deposit
+
+Withdrawal
+
+Drawer Closing
+
+Display:
+
+Date
+
+Time
+
+Teller
+
+Customer (if applicable)
+
+Amount
+
+Currency
+
+Transaction Type
+
+9. ADMIN DASHBOARD
+
+Create a Cash Management page showing:
+
+Bank Cash Vault
+
+Teller Cash Drawers
+
+Daily Deposits
+
+Daily Withdrawals
+
+Today's Cash Movement
+
+Cash Differences
+
+Alerts
+
+10. SECURITY
+
+Only Administrators can:
+
+Modify the Bank Cash Vault
+
+Allocate cash
+
+Correct cash differences
+
+Tellers can only:
+
+Deposit cash
+
+Withdraw cash
+
+View their own Cash Drawer
+
+Close their own Cash Drawer
+
+Log every action for auditing.
+
+The system must behave like a real commercial bank cash management system, with complete audit logs, strong security, and automatic balance updates.
+[7/1, 11:19 AM] Pyram Sterling Community: Build a complete Branch Management System for Pyram Sterling Bank.
+
+The system must support multiple bank branches across Haiti and allow future expansion to other countries.
+
+Branch Management
+
+Administrators can:
+
+Create a new branch
+
+Edit branch information
+
+Activate or deactivate a branch
+
+View all branches
+
+Each branch must have:
+
+Branch Name
+
+Branch Code
+
+Address
+
+City
+
+Country
+
+Phone Number
+
+Email
+
+Branch Manager
+
+Status (Active / Inactive)
+
+Date Created
+
+Employee Assignment
+
+Every employee must belong to one branch.
+
+Supported employee roles:
+
+Administrator
+
+Branch Manager
+
+Teller
+
+Loan Officer
+
+Business Officer
+
+Each employee can only work in one branch at a time unless reassigned by an Administrator.
+
+Customer Assignment
+
+Every customer account must have a Home Branch.
+
+Customers may visit any branch for services, but their account remains linked to their Home Branch.
+
+Cash Vault
+
+Each branch must have its own Cash Vault.
+
+Example:
+
+Port-au-Prince Branch
+
+HTG Vault
+
+USD Vault
+
+Cap-Haïtien Branch
+
+HTG Vault
+
+USD Vault
+
+Only authorized Administrators and Branch Managers can manage the branch vault.
+
+Teller Cash Drawers
+
+Each Teller belongs to one branch.
+
+The Teller can only access customers and cash operations assigned to that branch unless the bank policy allows nationwide service.
+
+Each Teller has an individual Cash Drawer.
+
+Daily Reports
+
+Generate reports for each branch including:
+
+Deposits
+
+Withdrawals
+
+Transfers
+
+Loans
+
+Payroll transactions
+
+New accounts opened
+
+Business accounts opened
+
+Revenue collected
+
+Cash differences
+
+Cash Vault balance
+
+Reports should be available daily, weekly, monthly, and yearly.
+
+Branch Dashboard
+
+Each Branch Manager should have access to a dedicated dashboard showing:
+
+Number of customers
+
+Active employees
+
+Cash Vault balance
+
+Teller Cash Drawers
+
+Daily transactions
+
+Pending loan applications
+
+Pending business account applications
+
+Branch revenue
+
+Branch Managers cannot view data from other branches.
+
+Administrator Dashboard
+
+Administrators must be able to:
+
+View all branches
+
+Compare branch performance
+
+Transfer employees between branches
+
+Transfer cash between branch vaults
+
+Monitor all operations
+
+View audit logs
+
+Security
+
+All branch operations must be logged.
+
+Every transaction must record:
+
+Branch
+
+Employee
+
+Customer
+
+Date
+
+Time
+
+Device
+
+IP Address (if available)
+
+The system must be scalable, secure, and designed like a real commercial banking platform capable of managing multiple branches.
+[7/4, 1:14 PM] Pyram Sterling Community: Make the entire Pyram Sterling Bank application fully responsive for mobile devices.
+
+The application must work perfectly on:
+
+- iPhone
+- Android
+- Tablets
+- Desktop
+
+Requirements:
+
+- No horizontal scrolling.
+- Sidebar must automatically collapse into a hamburger menu on screens smaller than 768px.
+- Cards must stack vertically.
+- Forms must fit within the screen width.
+- Buttons must resize properly.
+- Tables must become responsive with horizontal scrolling only inside the table container.
+- Text must never overflow.
+- All pages must be mobile-first.
+
+The user must never need to zoom or rotate the phone.
+
+Test every page including:
+
+- Dashboard
+- Transfer
+- Loans
+- Transactions
+- Wealth
+- Open Account
+- Business Account
+- Admin Dashboard
+- Teller Dashboard
+
+The application should look like a professional mobile banking app.
+[7/4, 1:14 PM] Pyram Sterling Community: Perform a complete backend diagnostic for Pyram Sterling Bank.
+
+The application is returning HTTP 500 Internal Server Error for every server action, including:
+
+- Open Personal Account
+- Open Business Account
+- Money Transfer
+- Loan Application
+- Any form submission
+
+This indicates a backend failure rather than a frontend issue.
+
+Perform a complete system audit.
+
+Check:
+
+- Is the backend server running correctly?
+- Are all API routes registered correctly?
+- Are all server actions connected?
+- Is the database connected successfully?
+- Are all required database tables created?
+- Are database migrations completed?
+- Are environment variables configured?
+- Are there any missing secrets?
+- Are authentication middleware or permissions blocking requests?
+- Are server logs showing exceptions?
+
+Inspect the backend logs and identify the exact source of every HTTP 500 error.
+
+Fix every issue preventing API requests from completing.
+
+After fixing:
+
+- Test Open Account
+- Test Business Account
+- Test Transfer
+- Test Loan
+- Test Deposits
+- Test Withdrawals
+
+Verify each feature completes successfully.
+
+Never return an HTML error page.
+
+Return structured JSON responses with proper error handling.
+
+Finally provide a report explaining:
+1. Root cause of the failures.
+2. What was fixed.
+3. Confirmation that every feature now works.
