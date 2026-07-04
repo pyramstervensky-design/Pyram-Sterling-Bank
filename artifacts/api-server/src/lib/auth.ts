@@ -29,6 +29,19 @@ function generateCvv(): string {
 
 export { generateAccountNumber, generateCardNumber, generateCardExpiry, generateCvv };
 
+// Admin allowlist: emails listed in the ADMIN_EMAILS env var (comma-separated)
+// are always granted the admin role on login. This provides a durable way to
+// bootstrap or recover admin access per environment without direct DB writes,
+// independent of the "first user = admin" rule.
+function isAllowlistedAdmin(email: string): boolean {
+  if (!email) return false;
+  const allowlist = (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  return allowlist.includes(email.trim().toLowerCase());
+}
+
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const { userId } = getAuth(req);
   if (!userId) {
@@ -67,10 +80,11 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 
     const existingUsers = await db.select().from(usersTable);
     const isFirstUser = existingUsers.length === 0;
+    const role = isFirstUser || isAllowlistedAdmin(email) ? "admin" : "user";
 
     const [newUser] = await db
       .insert(usersTable)
-      .values({ clerkId: userId, email, firstName, lastName, role: isFirstUser ? "admin" : "user" })
+      .values({ clerkId: userId, email, firstName, lastName, role })
       .returning();
     user = newUser;
 
@@ -93,6 +107,8 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     if (email && email !== user.email) updates.email = email;
     if (firstName && firstName !== user.firstName) updates.firstName = firstName;
     if (lastName && lastName !== user.lastName) updates.lastName = lastName;
+    // Promote to admin if this account's email is on the allowlist.
+    if (user.role !== "admin" && isAllowlistedAdmin(email || user.email)) updates.role = "admin";
     if (Object.keys(updates).length > 0) {
       await db.update(usersTable).set(updates).where(eq(usersTable.id, user.id));
       Object.assign(user, updates);

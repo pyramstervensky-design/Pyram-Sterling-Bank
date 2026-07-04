@@ -1,2 +1,3 @@
 - [Clerk JWT email claims](clerk-jwt-email-claims.md) — Clerk's prod JWT omits email from sessionClaims; auto-provisioning must fall back to clerkClient.users.getUser() or UNIQUE(email) 500s hit every 2nd+ user.
 - [Appointment lifecycle](appointment-lifecycle.md) — account_applications state machine; Kanè bank account is created ONLY on Complete (from confirmed/rescheduled), never on Accept.
+- [Admin access bootstrap](admin-access-bootstrap.md) — admin = users.role; ADMIN_EMAILS allowlist grants admin on login; empty admin list is often an access problem (wrong env's first-user-admin), not missing data.
