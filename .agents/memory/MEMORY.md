@@ -1,4 +1,5 @@
 - [Clerk JWT email claims](clerk-jwt-email-claims.md) — Clerk's prod JWT omits email from sessionClaims; auto-provisioning must fall back to clerkClient.users.getUser() or UNIQUE(email) 500s hit every 2nd+ user.
 - [Appointment lifecycle](appointment-lifecycle.md) — account_applications state machine; Kanè bank account is created ONLY on Complete (from confirmed/rescheduled), never on Accept.
 - [Admin access bootstrap & enforcement](admin-access-bootstrap.md) — admin = users.role; real boundary is API (requireAuth+requireAdmin, 403), frontend guard is UX-only; ADMIN_EMAILS allowlist grants admin; empty admin list is usually an access problem, not missing data.
+- [Per-user data isolation model](data-isolation-model.md) — no global row-level security; each endpoint scopes by req.dbUser.id, path-param mutations load-then-404 on ownership; any new endpoint must do the same or it's an IDOR.
 - [Responsive shell & nav drawer](responsive-layout.md) — mobile "messy layout" is usually the fixed sidebar; shell = persistent lg sidebar + mobile drawer sharing one SidebarContent; drawer needs full a11y contract.
