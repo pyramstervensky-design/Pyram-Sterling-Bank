@@ -1,1 +1,1 @@
-- [Pyram Sterling Bank architecture](pyram-sterling-bank.md) — First user auto-becomes admin; Kanè auto-provisioned on registration with $1k balance.
+- [Clerk JWT email claims](clerk-jwt-email-claims.md) — Clerk's prod JWT omits email from sessionClaims; auto-provisioning must fall back to clerkClient.users.getUser() or UNIQUE(email) 500s hit every 2nd+ user.

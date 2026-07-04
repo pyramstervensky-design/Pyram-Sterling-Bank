@@ -1,5 +1,5 @@
 import { type Request, type Response, type NextFunction } from "express";
-import { getAuth } from "@clerk/express";
+import { getAuth, clerkClient } from "@clerk/express";
 import { db, usersTable, kaneTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
@@ -37,13 +37,34 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   }
 
   const authObj = getAuth(req) as { userId: string; sessionClaims?: Record<string, unknown> };
-  const email = (authObj.sessionClaims?.email as string) ?? "";
-  const firstName = (authObj.sessionClaims?.first_name as string) ?? "";
-  const lastName = (authObj.sessionClaims?.last_name as string) ?? "";
+  let email = (authObj.sessionClaims?.email as string) ?? "";
+  let firstName = (authObj.sessionClaims?.first_name as string) ?? "";
+  let lastName = (authObj.sessionClaims?.last_name as string) ?? "";
+
+  // Production fallback: Clerk's default JWT does not embed email/name in session
+  // claims. When email is missing, fetch it from the Clerk Backend API so we always
+  // store a real, unique email (prevents UNIQUE-constraint 500s on empty-string email).
+  if (!email) {
+    try {
+      const clerkUser = await clerkClient.users.getUser(userId);
+      email = clerkUser.emailAddresses[0]?.emailAddress ?? "";
+      if (!firstName) firstName = clerkUser.firstName ?? "";
+      if (!lastName) lastName = clerkUser.lastName ?? "";
+    } catch (err) {
+      req.log?.warn({ err, userId }, "Failed to fetch Clerk user; proceeding with session claims");
+    }
+  }
 
   let [user] = await db.select().from(usersTable).where(eq(usersTable.clerkId, userId));
 
   if (!user) {
+    // Never insert an empty email — it violates UNIQUE(email) for the 2nd+ user and
+    // caused prior production 500s. If we still have no email, fail loudly instead.
+    if (!email) {
+      res.status(503).json({ error: "Nou pa ka jwenn imèl ou. Tanpri eseye ankò." });
+      return;
+    }
+
     const existingUsers = await db.select().from(usersTable);
     const isFirstUser = existingUsers.length === 0;
 
