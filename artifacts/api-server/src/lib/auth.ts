@@ -48,17 +48,6 @@ function isAllowlistedAdmin(email: string): boolean {
   return getAdminAllowlist().includes(email.trim().toLowerCase());
 }
 
-// Safety valve for demotion: returns true only if at least one existing account
-// actually matches the allowlist. If a misconfigured/typo'd ADMIN_EMAILS matches
-// nobody, we must NOT demote existing admins (that would lock everyone out of the
-// admin panel). Only consulted on the demotion branch, so the extra query is rare.
-async function allowlistHasLiveAdmin(): Promise<boolean> {
-  const allowlist = getAdminAllowlist();
-  if (allowlist.length === 0) return false;
-  const rows = await db.select({ email: usersTable.email }).from(usersTable);
-  return rows.some((r) => allowlist.includes(r.email.trim().toLowerCase()));
-}
-
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const { userId } = getAuth(req);
   if (!userId) {
@@ -72,12 +61,14 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   let lastName = (authObj.sessionClaims?.last_name as string) ?? "";
 
   // Production fallback: Clerk's default JWT does not embed email/name in session
-  // claims. When email is missing, fetch it from the Clerk Backend API so we always
-  // store a real, unique email (prevents UNIQUE-constraint 500s on empty-string email).
-  if (!email) {
+  // claims. Fetch from the Clerk Backend API whenever ANY of email/first/last is
+  // missing — not just email — so pre-existing users with empty names get them
+  // backfilled on their next login (below), and we always store a real, unique
+  // email (prevents UNIQUE-constraint 500s on empty-string email).
+  if (!email || !firstName || !lastName) {
     try {
       const clerkUser = await clerkClient.users.getUser(userId);
-      email = clerkUser.emailAddresses[0]?.emailAddress ?? "";
+      if (!email) email = clerkUser.emailAddresses[0]?.emailAddress ?? "";
       if (!firstName) firstName = clerkUser.firstName ?? "";
       if (!lastName) lastName = clerkUser.lastName ?? "";
     } catch (err) {
@@ -134,12 +125,16 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     // no longer on the list. When the allowlist is empty we leave the role
     // untouched so a cleared/misconfigured var can never mass-demote admins.
     if (getAdminAllowlist().length > 0) {
+      // Allowlist is authoritative when non-empty: promote listed emails, and
+      // DEMOTE every non-listed admin unconditionally. We do NOT guard demotion
+      // on an allowlisted account already existing in this environment — that
+      // guard permanently blocked demotion in prod (the intended admin had never
+      // logged in, so no matching row existed) and let stale admins persist.
+      // A misconfigured ADMIN_EMAILS is recoverable: fix the env var and log in.
       const desiredRole = isAllowlistedAdmin(email || user.email) ? "admin" : "user";
       if (desiredRole === "admin") {
         if (user.role !== "admin") updates.role = "admin";
-      } else if (user.role === "admin" && (await allowlistHasLiveAdmin())) {
-        // Only demote when the allowlist resolves to a real account, so a
-        // misconfigured var can never strip the last admin.
+      } else if (user.role === "admin") {
         updates.role = "user";
       }
     }

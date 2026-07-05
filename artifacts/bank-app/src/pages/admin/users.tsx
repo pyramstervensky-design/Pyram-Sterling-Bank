@@ -58,7 +58,7 @@ export default function AdminUsersPage() {
                 ) : (
                   users?.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.firstName} {user.lastName}</TableCell>
+                      <TableCell className="font-medium">{`${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—"}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell className="font-mono text-xs">{user.kane?.accountNumber}</TableCell>
                       <TableCell className="text-right font-medium">
