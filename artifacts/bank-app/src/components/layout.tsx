@@ -80,6 +80,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const drawerRef = useRef<HTMLElement>(null);
 
   const isAdmin = profile?.role === "admin";
+  // Admin navigation and badge are only surfaced while on an /admin route.
+  // The default customer dashboard stays free of any admin UI; admins reach
+  // the panel by navigating to /admin directly.
+  const showAdminUi =
+    isAdmin && (location === "/admin" || location.startsWith("/admin/"));
 
   // Close the mobile drawer whenever the route changes.
   useEffect(() => {
@@ -131,7 +136,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen bg-slate-50 overflow-hidden">
       {/* Bò Kote — desktop (persistent) */}
       <aside className="hidden lg:flex w-64 bg-slate-950 flex-col border-r border-slate-800 flex-shrink-0">
-        <SidebarContent isAdmin={isAdmin} signOut={signOut} />
+        <SidebarContent isAdmin={showAdminUi} signOut={signOut} />
       </aside>
 
       {/* Bò Kote — mobile / tablet (slide-in drawer) */}
@@ -157,7 +162,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             >
               <X className="w-5 h-5" />
             </button>
-            <SidebarContent isAdmin={isAdmin} signOut={signOut} onNavigate={() => setMobileOpen(false)} />
+            <SidebarContent isAdmin={showAdminUi} signOut={signOut} onNavigate={() => setMobileOpen(false)} />
           </aside>
         </div>
       )}
@@ -177,7 +182,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <Menu className="w-6 h-6" />
             </button>
             <h2 className="font-serif text-base sm:text-xl text-slate-900 truncate">
-              {isAdmin ? <span className="bg-amber-100 text-amber-800 text-xs font-sans px-2 py-1 rounded mr-2 sm:mr-3 align-middle tracking-wider font-bold">ADMIN</span> : null}
+              {showAdminUi ? <span className="bg-amber-100 text-amber-800 text-xs font-sans px-2 py-1 rounded mr-2 sm:mr-3 align-middle tracking-wider font-bold">ADMIN</span> : null}
               <span className="hidden sm:inline">Pyram Sterling Bank</span>
               <span className="sm:hidden">Pyram Sterling</span>
             </h2>
