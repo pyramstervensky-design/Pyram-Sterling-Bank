@@ -1,0 +1,143 @@
+There are several UI and data binding issues that must be fixed immediately.
+
+1. Customer dashboard is showing ADMIN UI
+
+A normal customer must NEVER see:
+
+ADMIN badge
+Admin navigation
+User management pages
+Admin controls
+
+Only users whose email is in the admin whitelist should see those elements.
+
+All other users must see only the customer banking dashboard.
+
+Hide every admin component for non-admin users.
+
+2. Customer full name is missing
+
+On the customer dashboard there is only a dash (-).
+
+Instead it must display the customer's FULL NAME.
+
+Example:
+
+Pyram Stervensky
+
+Never display "-" if the customer has a first name and last name.
+
+If first_name and last_name exist in the database, concatenate them.
+
+If only one exists, display it.
+
+Only show "-" if absolutely no name exists.
+
+3. Customer list (Admin)
+
+In User Management, the "Kliyan" column is empty.
+
+Instead of leaving it blank, display:
+
+Full Name
+
+NOT email.
+
+Example:
+
+Pyram Stervensky
+
+Email should remain in the Email column only.
+
+4. Dashboard account card
+
+Current layout:
+
+KANÈ:
+PSB4713081648
+
+This is incorrect.
+
+It should become:
+
+Pyram Stervensky
+
+KANÈ:
+PSB4713081648
+
+The customer's name must always appear above the account number.
+
+5. Fix data binding
+
+Investigate why:
+
+first_name
+
+last_name
+
+are not appearing even though the user exists.
+
+Verify:
+
+Clerk sync
+User creation
+User update
+Database query
+API response
+
+If names are missing in existing users, backfill them from Clerk automatically on next login.
+
+6. Customer list query
+
+Ensure the admin customer table returns:
+
+first_name
+
+last_name
+
+email
+
+account_number
+
+balance
+
+credit_score
+
+instead of returning only email.
+
+7. Responsive mobile
+
+Verify these fixes on:
+
+Desktop
+
+Tablet
+
+iPhone
+
+Android
+
+Everything must display correctly on every screen size.
+
+Goal
+
+A customer should see:
+
+Pyram Stervensky
+
+KANÈ:
+PSB4713081648
+
+Balance
+
+Transactions
+
+Transfer
+
+Loans
+
+without ANY admin interface.
+
+The admin should see customer names correctly in the management table instead of blank values.
+
+Also explain what caused the names not to render and permanently fix the underlying issue instead of only masking it in the UI.
