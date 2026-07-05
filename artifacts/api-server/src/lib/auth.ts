@@ -29,17 +29,34 @@ function generateCvv(): string {
 
 export { generateAccountNumber, generateCardNumber, generateCardExpiry, generateCvv };
 
-// Admin allowlist: emails listed in the ADMIN_EMAILS env var (comma-separated)
-// are always granted the admin role on login. This provides a durable way to
-// bootstrap or recover admin access per environment without direct DB writes,
-// independent of the "first user = admin" rule.
-function isAllowlistedAdmin(email: string): boolean {
-  if (!email) return false;
-  const allowlist = (process.env.ADMIN_EMAILS ?? "")
+// Admin allowlist: emails listed in the ADMIN_EMAILS env var (comma-separated).
+// When the allowlist is non-empty it is the SINGLE SOURCE OF TRUTH for admin
+// access: only listed emails are admin, and any account NOT on the list is
+// (re)set to a regular user on login — this durably demotes stale admins across
+// every environment without needing direct DB writes. If the allowlist is empty
+// (unset/misconfigured), we never mass-change roles and fall back to the
+// "first user = admin" bootstrap so the system is never left without an admin.
+function getAdminAllowlist(): string[] {
+  return (process.env.ADMIN_EMAILS ?? "")
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
-  return allowlist.includes(email.trim().toLowerCase());
+}
+
+function isAllowlistedAdmin(email: string): boolean {
+  if (!email) return false;
+  return getAdminAllowlist().includes(email.trim().toLowerCase());
+}
+
+// Safety valve for demotion: returns true only if at least one existing account
+// actually matches the allowlist. If a misconfigured/typo'd ADMIN_EMAILS matches
+// nobody, we must NOT demote existing admins (that would lock everyone out of the
+// admin panel). Only consulted on the demotion branch, so the extra query is rare.
+async function allowlistHasLiveAdmin(): Promise<boolean> {
+  const allowlist = getAdminAllowlist();
+  if (allowlist.length === 0) return false;
+  const rows = await db.select({ email: usersTable.email }).from(usersTable);
+  return rows.some((r) => allowlist.includes(r.email.trim().toLowerCase()));
 }
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
@@ -80,7 +97,10 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 
     const existingUsers = await db.select().from(usersTable);
     const isFirstUser = existingUsers.length === 0;
-    const role = isFirstUser || isAllowlistedAdmin(email) ? "admin" : "user";
+    const allowlistActive = getAdminAllowlist().length > 0;
+    const role = allowlistActive
+      ? (isAllowlistedAdmin(email) ? "admin" : "user")
+      : (isFirstUser ? "admin" : "user");
 
     const [newUser] = await db
       .insert(usersTable)
@@ -89,7 +109,9 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     user = newUser;
 
     // Admin (first user) gets Kanè immediately. Regular users apply first.
-    if (isFirstUser) {
+    // Guarded on role so that under an active allowlist a non-admin first
+    // registrant does NOT receive an unearned Kanè.
+    if (isFirstUser && role === "admin") {
       const accountNumber = generateAccountNumber();
       const cardNumber = generateCardNumber();
       await db.insert(kaneTable).values({
@@ -107,8 +129,20 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     if (email && email !== user.email) updates.email = email;
     if (firstName && firstName !== user.firstName) updates.firstName = firstName;
     if (lastName && lastName !== user.lastName) updates.lastName = lastName;
-    // Promote to admin if this account's email is on the allowlist.
-    if (user.role !== "admin" && isAllowlistedAdmin(email || user.email)) updates.role = "admin";
+    // ADMIN_EMAILS is authoritative when set: allowlisted emails are admin,
+    // everyone else becomes a regular user. This DEMOTES stale admins that are
+    // no longer on the list. When the allowlist is empty we leave the role
+    // untouched so a cleared/misconfigured var can never mass-demote admins.
+    if (getAdminAllowlist().length > 0) {
+      const desiredRole = isAllowlistedAdmin(email || user.email) ? "admin" : "user";
+      if (desiredRole === "admin") {
+        if (user.role !== "admin") updates.role = "admin";
+      } else if (user.role === "admin" && (await allowlistHasLiveAdmin())) {
+        // Only demote when the allowlist resolves to a real account, so a
+        // misconfigured var can never strip the last admin.
+        updates.role = "user";
+      }
+    }
     if (Object.keys(updates).length > 0) {
       await db.update(usersTable).set(updates).where(eq(usersTable.id, user.id));
       Object.assign(user, updates);
