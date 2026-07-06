@@ -63,11 +63,39 @@ function SignUpPage() {
   );
 }
 
+function SignedInHome() {
+  const { data: profile, isLoading, isError, refetch } = useGetMe();
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[100dvh] items-center justify-center bg-slate-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500" />
+      </div>
+    );
+  }
+  // Never guess the destination when the role is unknown: an errored/undefined
+  // profile must not fall through to the customer dashboard, or an admin gets
+  // misrouted on a transient /api/users/me failure. Block and let them retry.
+  if (isError || !profile) {
+    return (
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 bg-slate-50 px-4 text-center">
+        <p className="text-slate-700">Nou pa t kapab chaje kont ou an. Tanpri reeseye.</p>
+        <button
+          onClick={() => refetch()}
+          className="rounded-md bg-slate-900 px-4 py-2 font-medium text-white transition-colors hover:bg-slate-800"
+        >
+          Reeseye
+        </button>
+      </div>
+    );
+  }
+  return <Redirect to={profile.role === "admin" ? "/admin" : "/dashboard"} />;
+}
+
 function HomeRedirect() {
   return (
     <>
       <Show when="signed-in">
-        <Redirect to="/dashboard" />
+        <SignedInHome />
       </Show>
       <Show when="signed-out">
         <LandingPage />

@@ -26,7 +26,7 @@ function SidebarContent({ isAdmin, onNavigate, signOut }: { isAdmin: boolean; on
   return (
     <>
       <div className="px-5 py-4 border-b border-slate-800 flex-shrink-0">
-        <Link href="/dashboard" onClick={onNavigate} className="flex items-center justify-center">
+        <Link href={isAdmin ? "/admin" : "/dashboard"} onClick={onNavigate} className="flex items-center justify-center">
           <div className="bg-white rounded-xl px-4 py-2.5 w-full flex items-center justify-center">
             <img src="/pyram-logo.png" alt="Pyram Sterling Bank" className="w-full h-auto object-contain" style={{ maxHeight: "52px" }} />
           </div>
@@ -34,24 +34,26 @@ function SidebarContent({ isAdmin, onNavigate, signOut }: { isAdmin: boolean; on
       </div>
 
       <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
-        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-2 px-3">Bankè</div>
-        <NavLink href="/dashboard" icon={Home} onNavigate={onNavigate}>Tablo de bò</NavLink>
-        <NavLink href="/transactions" icon={ArrowRightLeft} onNavigate={onNavigate}>Tranzaksyon</NavLink>
-        <NavLink href="/send" icon={Send} onNavigate={onNavigate}>Transfè</NavLink>
-
-        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-8 px-3">Richès</div>
-        <NavLink href="/loans" icon={Landmark} onNavigate={onNavigate}>Prè</NavLink>
-        <NavLink href="/partners" icon={Users} onNavigate={onNavigate}>Patnè</NavLink>
-
-        {isAdmin && (
+        {isAdmin ? (
           <>
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-8 px-3">Admin</div>
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-2 px-3">Admin</div>
             <NavLink href="/admin" icon={ShieldAlert} onNavigate={onNavigate}>Apersi</NavLink>
             <NavLink href="/admin/users" icon={Users} onNavigate={onNavigate}>Itilizatè</NavLink>
             <NavLink href="/admin/applications" icon={FileText} onNavigate={onNavigate}>Aplikasyon</NavLink>
             <NavLink href="/admin/transactions" icon={ArrowRightLeft} onNavigate={onNavigate}>Tout Tranzaksyon</NavLink>
             <NavLink href="/admin/loans" icon={Landmark} onNavigate={onNavigate}>Apwobasyon Prè</NavLink>
             <NavLink href="/admin/partners" icon={Users} onNavigate={onNavigate}>Jere Patnè</NavLink>
+          </>
+        ) : (
+          <>
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-2 px-3">Bankè</div>
+            <NavLink href="/dashboard" icon={Home} onNavigate={onNavigate}>Tablo de bò</NavLink>
+            <NavLink href="/transactions" icon={ArrowRightLeft} onNavigate={onNavigate}>Tranzaksyon</NavLink>
+            <NavLink href="/send" icon={Send} onNavigate={onNavigate}>Transfè</NavLink>
+
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-8 px-3">Richès</div>
+            <NavLink href="/loans" icon={Landmark} onNavigate={onNavigate}>Prè</NavLink>
+            <NavLink href="/partners" icon={Users} onNavigate={onNavigate}>Patnè</NavLink>
           </>
         )}
       </nav>
