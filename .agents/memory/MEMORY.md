@@ -3,3 +3,4 @@
 - [Admin access bootstrap & enforcement](admin-access-bootstrap.md) — admin = users.role; real boundary is API (requireAuth+requireAdmin, 403), frontend guard is UX-only; ADMIN_EMAILS is AUTHORITATIVE when set (demotes non-listed admins on login, self-heals prod); empty list falls back to first-user bootstrap.
 - [Per-user data isolation model](data-isolation-model.md) — no global row-level security; each endpoint scopes by req.dbUser.id, path-param mutations load-then-404 on ownership; any new endpoint must do the same or it's an IDOR.
 - [Responsive shell & nav drawer](responsive-layout.md) — mobile "messy layout" is usually the fixed sidebar; shell = persistent lg sidebar + mobile drawer sharing one SidebarContent; drawer needs full a11y contract.
+- [Verifying Clerk-gated admin UI](clerk-admin-verification.md) — use runTest({testClerkAuth:true}) + a [Clerk Auth] step to sign in as any admin and screenshot gated pages; no user password needed.
