@@ -79,12 +79,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
 
-  const isAdmin = profile?.role === "admin";
-  // Admin navigation and badge are only surfaced while on an /admin route.
-  // The default customer dashboard stays free of any admin UI; admins reach
-  // the panel by navigating to /admin directly.
-  const showAdminUi =
-    isAdmin && (location === "/admin" || location.startsWith("/admin/"));
+  // Admin UI (nav + badge) is gated purely on the account's role. Admins see
+  // the admin entry points everywhere, including the customer dashboard, so the
+  // panel is always discoverable; regular customers (role !== "admin") never
+  // see any admin UI. The backend still enforces access on every admin route.
+  const showAdminUi = profile?.role === "admin";
 
   // Close the mobile drawer whenever the route changes.
   useEffect(() => {
