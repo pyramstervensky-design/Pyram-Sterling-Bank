@@ -1,12 +1,33 @@
 import { AppLayout } from "@/components/layout";
-import { useAdminGetStats, useAdminListUsers, useAdminListApplications } from "@workspace/api-client-react";
+import {
+  useAdminGetStats,
+  useAdminListUsers,
+  useAdminListApplications,
+  useAdminListLoans,
+  useAdminListTransactions,
+} from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, Landmark, Activity, FileText, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { Users, Landmark, Activity, FileText, Clock, CheckCircle2, Banknote, ArrowDownLeft, ArrowUpRight, Send } from "lucide-react";
 import { Link } from "wouter";
-import { format } from "date-fns";
 
 const DARK_BLUE = "#1a2e6e";
+const GOLD = "#d4960a";
+
+function translateTxType(type: string): string {
+  const map: Record<string, string> = {
+    deposit: "Depo",
+    withdrawal: "Retrè",
+    transfer: "Transfè",
+  };
+  return map[type] ?? type;
+}
+
+function txIcon(type: string) {
+  if (type === "deposit") return ArrowDownLeft;
+  if (type === "withdrawal") return ArrowUpRight;
+  return Send;
+}
 
 function scoreColor(score: number) {
   if (score >= 750) return { bg: "#eff6ff", text: "#1d4ed8", dot: "#3b82f6", label: "Ekselan" };
@@ -39,8 +60,14 @@ export default function AdminDashboardPage() {
   const { data: stats, isLoading: statsLoading } = useAdminGetStats();
   const { data: users = [] } = useAdminListUsers();
   const { data: apps = [] } = useAdminListApplications();
+  const { data: loans = [] } = useAdminListLoans();
+  const { data: transactions = [] } = useAdminListTransactions({ limit: 200 });
 
   const pendingApps = apps.filter((a) => a.status === "pending").slice(0, 5);
+  const pendingLoans = loans.filter((l) => l.status === "pending");
+  const pendingTxs = transactions.filter(
+    (t) => t.status === "pending" && ["deposit", "withdrawal", "transfer"].includes(t.type),
+  );
 
   const scoreGroups = users
     .filter((u) => u.kane?.creditScore !== undefined)
@@ -63,9 +90,16 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Metric cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           <StatCard title="Total Kliyan" value={statsLoading ? undefined : stats?.totalUsers} icon={Users} href="/admin/users" />
           <StatCard title="Total Aktif Jere" value={statsLoading ? undefined : stats?.totalBalance !== undefined ? `G ${Math.round(stats.totalBalance).toLocaleString()}` : undefined} icon={Landmark} />
+          <StatCard
+            title="Prè an Atant"
+            value={statsLoading ? undefined : (stats?.pendingLoans ?? pendingLoans.length)}
+            icon={Banknote}
+            sub="Demann prè kliyan"
+            href="/admin/loans"
+          />
           <StatCard
             title="Tranzaksyon an Atant"
             value={statsLoading ? undefined : stats?.pendingTransactions}
@@ -80,6 +114,87 @@ export default function AdminDashboardPage() {
             sub={`${apps.filter(a => a.status === "completed" || a.status === "approved").length} konplete`}
             href="/admin/applications"
           />
+        </div>
+
+        {/* Pending requests — loans & transactions */}
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Pending Loans */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-base font-semibold font-serif flex items-center gap-2" style={{ color: DARK_BLUE }}>
+                <Clock className="w-4 h-4 text-amber-500" />
+                Demann Prè an Atant{pendingLoans.length > 0 ? ` (${pendingLoans.length})` : ""}
+              </CardTitle>
+              <Link href="/admin/loans" className="text-xs font-medium" style={{ color: GOLD }}>
+                Jere
+              </Link>
+            </CardHeader>
+            <CardContent className="p-0">
+              {pendingLoans.length === 0 ? (
+                <div className="p-6 text-center text-slate-400 text-sm">
+                  <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-emerald-400" />
+                  Pa gen demann prè an atant.
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {pendingLoans.slice(0, 5).map((loan) => (
+                    <Link key={loan.id} href="/admin/loans" className="px-5 py-3 flex items-start justify-between gap-3 hover:bg-slate-50">
+                      <div className="min-w-0">
+                        <p className="font-medium text-slate-900 text-sm truncate">{loan.userName ?? `Itilizatè #${loan.userId}`}</p>
+                        <p className="text-xs text-slate-500 truncate">{loan.purpose}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-sm font-semibold font-mono text-slate-900">G {loan.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                        <span className="text-xs text-amber-600 font-medium">An atant</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Pending Transactions */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-base font-semibold font-serif flex items-center gap-2" style={{ color: DARK_BLUE }}>
+                <Clock className="w-4 h-4 text-amber-500" />
+                Tranzaksyon an Atant{pendingTxs.length > 0 ? ` (${pendingTxs.length})` : ""}
+              </CardTitle>
+              <Link href="/admin/transactions" className="text-xs font-medium" style={{ color: GOLD }}>
+                Jere
+              </Link>
+            </CardHeader>
+            <CardContent className="p-0">
+              {pendingTxs.length === 0 ? (
+                <div className="p-6 text-center text-slate-400 text-sm">
+                  <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-emerald-400" />
+                  Pa gen tranzaksyon an atant.
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {pendingTxs.slice(0, 5).map((tx) => {
+                    const Icon = txIcon(tx.type);
+                    return (
+                      <Link key={tx.id} href="/admin/transactions" className="px-5 py-3 flex items-start justify-between gap-3 hover:bg-slate-50">
+                        <div className="min-w-0 flex items-start gap-2">
+                          <Icon className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="font-medium text-slate-900 text-sm truncate">{translateTxType(tx.type)}</p>
+                            <p className="text-xs text-slate-500 truncate">{tx.description}</p>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-sm font-semibold font-mono text-slate-900">G {tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                          <span className="text-xs text-amber-600 font-medium">An atant</span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">

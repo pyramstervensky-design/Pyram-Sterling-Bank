@@ -11,3 +11,5 @@ To visually prove an admin-gated page renders without handling the user's passwo
 - Then `[Browser] Navigate` to the gated route and `[Verify]` the content; ask the subagent to save a screenshot to a `/tmp/*.png` path and report it (the returned `screenshotPaths` array is often empty, so read the path from `testOutput` and copy the file into the repo to present).
 
 **Why:** the static `screenshot` tool has no Clerk session, so it only ever shows the sign-in page for auth-gated routes. The testing subagent carries a programmatic session and can reach the real gated UI.
+
+**Do NOT** sign in as a fresh test email and then `[DB] UPDATE users SET role='admin'` — when `ADMIN_EMAILS` is active it is authoritative and the auth middleware re-demotes any non-allowlisted user back to `user` on the next API call, so the admin page shows "Aksè Refize". Sign in with an email that is actually on the allowlist instead.
