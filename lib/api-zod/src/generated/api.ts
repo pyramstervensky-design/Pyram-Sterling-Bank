@@ -503,7 +503,9 @@ export const adminListTransactionsQueryOffsetDefault = 0;
 export const AdminListTransactionsQueryParams = zod.object({
   "limit": zod.coerce.number().default(adminListTransactionsQueryLimitDefault),
   "offset": zod.coerce.number().default(adminListTransactionsQueryOffsetDefault),
-  "userId": zod.coerce.string().optional()
+  "userId": zod.coerce.string().optional(),
+  "status": zod.enum(['pending', 'completed', 'failed']).optional(),
+  "type": zod.enum(['deposit', 'withdrawal', 'transfer', 'loan_disbursement', 'loan_repayment', 'partner_payment']).optional()
 })
 
 export const AdminListTransactionsResponseItem = zod.object({
@@ -519,6 +521,48 @@ export const AdminListTransactionsResponseItem = zod.object({
   "createdAt": zod.string()
 })
 export const AdminListTransactionsResponse = zod.array(AdminListTransactionsResponseItem)
+
+
+/**
+ * @summary Admin — approve a pending transaction (deposit/withdrawal/transfer)
+ */
+export const AdminApproveTransactionParams = zod.object({
+  "transactionId": zod.coerce.number()
+})
+
+export const AdminApproveTransactionResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "type": zod.enum(['deposit', 'withdrawal', 'transfer', 'loan_disbursement', 'loan_repayment', 'partner_payment']),
+  "amount": zod.number(),
+  "description": zod.string(),
+  "status": zod.enum(['completed', 'pending', 'failed']),
+  "recipientAccount": zod.string().nullish(),
+  "recipientName": zod.string().nullish(),
+  "senderAccount": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Admin — reject a pending transaction (deposit/withdrawal/transfer)
+ */
+export const AdminRejectTransactionParams = zod.object({
+  "transactionId": zod.coerce.number()
+})
+
+export const AdminRejectTransactionResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "type": zod.enum(['deposit', 'withdrawal', 'transfer', 'loan_disbursement', 'loan_repayment', 'partner_payment']),
+  "amount": zod.number(),
+  "description": zod.string(),
+  "status": zod.enum(['completed', 'pending', 'failed']),
+  "recipientAccount": zod.string().nullish(),
+  "recipientName": zod.string().nullish(),
+  "senderAccount": zod.string().nullish(),
+  "createdAt": zod.string()
+})
 
 
 /**
@@ -675,7 +719,8 @@ export const AdminGetStatsResponse = zod.object({
   "activeLoans": zod.number(),
   "totalLoansIssued": zod.number(),
   "totalPartnersApproved": zod.number(),
-  "pendingApplications": zod.number()
+  "pendingApplications": zod.number(),
+  "pendingTransactions": zod.number()
 })
 
 

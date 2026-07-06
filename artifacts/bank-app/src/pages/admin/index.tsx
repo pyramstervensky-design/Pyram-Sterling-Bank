@@ -66,7 +66,13 @@ export default function AdminDashboardPage() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard title="Total Kliyan" value={statsLoading ? undefined : stats?.totalUsers} icon={Users} href="/admin/users" />
           <StatCard title="Total Aktif Jere" value={statsLoading ? undefined : stats?.totalBalance !== undefined ? `G ${Math.round(stats.totalBalance).toLocaleString()}` : undefined} icon={Landmark} />
-          <StatCard title="Tranzaksyon" value={statsLoading ? undefined : stats?.totalTransactions} icon={Activity} href="/admin/transactions" />
+          <StatCard
+            title="Tranzaksyon an Atant"
+            value={statsLoading ? undefined : stats?.pendingTransactions}
+            icon={Activity}
+            sub={`${stats?.totalTransactions ?? 0} total`}
+            href="/admin/transactions"
+          />
           <StatCard
             title="Aplikasyon an Atant"
             value={statsLoading ? undefined : (stats as any)?.pendingApplications ?? pendingApps.length}
@@ -161,7 +167,7 @@ export default function AdminDashboardPage() {
               { href: "/admin/applications", label: "Revize Aplikasyon", icon: FileText, color: "#fefce8" },
               { href: "/admin/loans", label: "Apwobasyon Prè", icon: Landmark, color: "#eff6ff" },
               { href: "/admin/users", label: "Jere Kliyan", icon: Users, color: "#f0fdf4" },
-              { href: "/admin/transactions", label: "Tranzaksyon", icon: Activity, color: "#faf5ff" },
+              { href: "/admin/transactions", label: "Apwobasyon Tranzaksyon", icon: Activity, color: "#faf5ff" },
             ].map(({ href, label, icon: Icon, color }) => (
               <Link key={href} href={href} className="rounded-xl p-4 flex items-center gap-3 border border-slate-200 hover:shadow-sm transition-shadow" style={{ backgroundColor: color }}>
                 <Icon className="w-5 h-5 text-slate-600" />

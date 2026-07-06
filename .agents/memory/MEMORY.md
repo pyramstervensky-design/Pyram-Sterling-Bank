@@ -3,6 +3,7 @@
 - [Admin access bootstrap & enforcement](admin-access-bootstrap.md) — admin = users.role; real boundary is API (requireAdmin/403), frontend is UX-only; ADMIN_EMAILS authoritative when set (demotes non-listed), else first-user bootstrap.
 - [Admin-first routing & role-gated shell](admin-first-routing.md) — signed-in home sends admins to /admin, others to /dashboard; sidebar is role-scoped; role-unknown must NOT fall through to the customer view.
 - [Per-user data isolation model](data-isolation-model.md) — no global row-level security; each endpoint scopes by req.dbUser.id, path-param mutations load-then-404 on ownership; any new endpoint must do the same or it's an IDOR.
+- [Pending money-request approval](pending-money-approval.md) — customer money actions insert pending, balance moves only on admin approve; settlement must be txn + SELECT FOR UPDATE + idempotent; notifyAdmins best-effort.
 - [Responsive shell & nav drawer](responsive-layout.md) — mobile "messy layout" is usually the fixed sidebar; shell = persistent lg sidebar + mobile drawer sharing one SidebarContent; drawer needs full a11y contract.
 - [Verifying Clerk-gated admin UI](clerk-admin-verification.md) — use runTest({testClerkAuth:true}) + a [Clerk Auth] step to sign in as any admin and screenshot gated pages; no user password needed.
 - [First-login provisioning race](first-login-provisioning-race.md) — SPA fires concurrent authed calls; multi-unique-constraint insert needs try+re-select, not onConflict(single target).

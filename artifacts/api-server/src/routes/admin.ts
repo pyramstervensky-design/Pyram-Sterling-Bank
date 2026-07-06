@@ -3,7 +3,7 @@ import {
   db, usersTable, kaneTable, loansTable, transactionsTable, partnersTable,
   accountApplicationsTable, notificationsTable, creditScoreHistoryTable,
 } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { requireAuth, requireAdmin, generateAccountNumber, generateCardNumber, generateCardExpiry, generateCvv } from "../lib/auth";
 
 const router = Router();
@@ -358,6 +358,8 @@ router.get("/transactions", async (req, res) => {
   const limit = Number(req.query.limit ?? 50);
   const offset = Number(req.query.offset ?? 0);
   const userId = req.query.userId as string | undefined;
+  const status = req.query.status as string | undefined;
+  const type = req.query.type as string | undefined;
 
   let txs: typeof transactionsTable.$inferSelect[];
   if (userId) {
@@ -371,12 +373,155 @@ router.get("/transactions", async (req, res) => {
       .orderBy(desc(transactionsTable.createdAt)).limit(limit).offset(offset);
   }
 
-  res.json(txs.map((t) => ({
+  let filtered = txs;
+  if (status) filtered = filtered.filter((t) => t.status === status);
+  if (type) filtered = filtered.filter((t) => t.type === type);
+
+  res.json(filtered.map(formatAdminTx));
+});
+
+function formatAdminTx(t: typeof transactionsTable.$inferSelect) {
+  return {
     id: t.id, userId: t.userId, type: t.type, amount: parseFloat(t.amount),
     description: t.description, status: t.status,
     recipientAccount: t.recipientAccount ?? null, recipientName: t.recipientName ?? null,
     senderAccount: t.senderAccount ?? null, createdAt: t.createdAt.toISOString(),
-  })));
+  };
+}
+
+// Approve a pending money-movement request (deposit / withdrawal / transfer):
+// balance is moved here — never at request time.
+router.post("/transactions/:transactionId/approve", async (req, res) => {
+  const transactionId = parseInt(req.params.transactionId);
+
+  type Outcome =
+    | { kind: "ok"; tx: typeof transactionsTable.$inferSelect }
+    | { kind: "error"; code: number; error: string };
+
+  const outcome = await db.transaction<Outcome>(async (txDb) => {
+    // Row lock: FOR UPDATE serializes concurrent approvals of the same tx.
+    // The second caller blocks until the first commits, then sees a non-pending
+    // status and bails — so money is only ever moved once.
+    const [tx] = await txDb
+      .select()
+      .from(transactionsTable)
+      .where(eq(transactionsTable.id, transactionId))
+      .for("update");
+
+    if (!tx) return { kind: "error", code: 404, error: "Tranzaksyon pa jwenn" };
+    if (tx.status !== "pending") return { kind: "error", code: 400, error: "Tranzaksyon pa an atant" };
+
+    const amount = parseFloat(tx.amount);
+    const [kane] = await txDb.select().from(kaneTable).where(eq(kaneTable.userId, tx.userId));
+    if (!kane) return { kind: "error", code: 404, error: "Kont kliyan pa jwenn" };
+
+    if (tx.type === "deposit") {
+      const newBalance = parseFloat(kane.balance) + amount;
+      await txDb.update(kaneTable).set({ balance: String(newBalance.toFixed(2)) }).where(eq(kaneTable.userId, tx.userId));
+      await txDb.insert(notificationsTable).values({
+        userId: tx.userId,
+        title: "Depo apwouve",
+        message: `Depo ou a nan valè G ${amount.toFixed(2)} apwouve. Nouvo balans: G ${newBalance.toFixed(2)}.`,
+        type: "success",
+        isRead: false,
+      });
+    } else if (tx.type === "withdrawal") {
+      if (parseFloat(kane.balance) < amount) {
+        return { kind: "error", code: 400, error: "Kliyan an pa gen ase lajan. Rejte demann lan." };
+      }
+      const newBalance = parseFloat(kane.balance) - amount;
+      await txDb.update(kaneTable).set({ balance: String(newBalance.toFixed(2)) }).where(eq(kaneTable.userId, tx.userId));
+      await txDb.insert(notificationsTable).values({
+        userId: tx.userId,
+        title: "Retrè apwouve",
+        message: `Retrè ou a nan valè G ${amount.toFixed(2)} apwouve. Nouvo balans: G ${newBalance.toFixed(2)}.`,
+        type: "success",
+        isRead: false,
+      });
+    } else if (tx.type === "transfer") {
+      if (parseFloat(kane.balance) < amount) {
+        return { kind: "error", code: 400, error: "Ekspeditè a pa gen ase lajan. Rejte demann lan." };
+      }
+      if (!tx.recipientAccount) return { kind: "error", code: 400, error: "Kont destinatè manke" };
+      const [recipientKane] = await txDb.select().from(kaneTable).where(eq(kaneTable.accountNumber, tx.recipientAccount));
+      if (!recipientKane) return { kind: "error", code: 404, error: "Kont destinatè pa jwenn ankò. Rejte demann lan." };
+
+      const senderNewBalance = parseFloat(kane.balance) - amount;
+      const recipientNewBalance = parseFloat(recipientKane.balance) + amount;
+      await txDb.update(kaneTable).set({ balance: String(senderNewBalance.toFixed(2)) }).where(eq(kaneTable.userId, tx.userId));
+      await txDb.update(kaneTable).set({ balance: String(recipientNewBalance.toFixed(2)) }).where(eq(kaneTable.userId, recipientKane.userId));
+
+      await txDb.insert(transactionsTable).values({
+        userId: recipientKane.userId,
+        type: "deposit",
+        amount: tx.amount,
+        description: tx.senderAccount ? `Transfè soti nan ${tx.senderAccount}` : "Transfè resevwa",
+        status: "completed",
+        senderAccount: tx.senderAccount ?? null,
+        recipientAccount: tx.recipientAccount,
+      });
+
+      await txDb.insert(notificationsTable).values({
+        userId: tx.userId,
+        title: "Transfè apwouve",
+        message: `Transfè ou a nan valè G ${amount.toFixed(2)} bay ${tx.recipientName ?? tx.recipientAccount} apwouve. Nouvo balans: G ${senderNewBalance.toFixed(2)}.`,
+        type: "success",
+        isRead: false,
+      });
+      await txDb.insert(notificationsTable).values({
+        userId: recipientKane.userId,
+        title: "Ou resevwa lajan",
+        message: `Ou resevwa G ${amount.toFixed(2)}${tx.senderAccount ? ` soti nan ${tx.senderAccount}` : ""}. Nouvo balans: G ${recipientNewBalance.toFixed(2)}.`,
+        type: "success",
+        isRead: false,
+      });
+    } else {
+      return { kind: "error", code: 400, error: "Tip tranzaksyon sa a pa mande apwobasyon" };
+    }
+
+    const [updated] = await txDb.update(transactionsTable)
+      .set({ status: "completed" })
+      .where(eq(transactionsTable.id, transactionId))
+      .returning();
+
+    return { kind: "ok", tx: updated };
+  });
+
+  if (outcome.kind === "error") {
+    res.status(outcome.code).json({ error: outcome.error });
+    return;
+  }
+  res.json(formatAdminTx(outcome.tx));
+});
+
+router.post("/transactions/:transactionId/reject", async (req, res) => {
+  const transactionId = parseInt(req.params.transactionId);
+
+  // Conditional transition: only flips pending -> failed once, so a concurrent
+  // approve/reject race can never double-process the request.
+  const [updated] = await db
+    .update(transactionsTable)
+    .set({ status: "failed" })
+    .where(and(eq(transactionsTable.id, transactionId), eq(transactionsTable.status, "pending")))
+    .returning();
+
+  if (!updated) {
+    const [existing] = await db.select().from(transactionsTable).where(eq(transactionsTable.id, transactionId));
+    if (!existing) { res.status(404).json({ error: "Tranzaksyon pa jwenn" }); return; }
+    res.status(400).json({ error: "Tranzaksyon pa an atant" });
+    return;
+  }
+
+  const typeLabel = updated.type === "deposit" ? "Depo" : updated.type === "withdrawal" ? "Retrè" : "Transfè";
+  await db.insert(notificationsTable).values({
+    userId: updated.userId,
+    title: `${typeLabel} rejte`,
+    message: `Demann ${typeLabel.toLowerCase()} ou a nan valè G ${parseFloat(updated.amount).toFixed(2)} te rejte pa admin.`,
+    type: "error",
+    isRead: false,
+  });
+
+  res.json(formatAdminTx(updated));
 });
 
 // ── Loans ─────────────────────────────────────────────────────────────────────
@@ -519,6 +664,9 @@ router.get("/stats", async (_req, res) => {
     .reduce((sum, l) => sum + parseFloat(l.amount), 0);
   const totalPartnersApproved = partners.filter((p) => p.status === "approved").length;
   const pendingApplications = apps.filter((a) => a.status === "pending").length;
+  const pendingTransactions = txs.filter(
+    (t) => t.status === "pending" && ["deposit", "withdrawal", "transfer"].includes(t.type),
+  ).length;
 
   res.json({
     totalUsers: users.length,
@@ -529,6 +677,7 @@ router.get("/stats", async (_req, res) => {
     totalLoansIssued,
     totalPartnersApproved,
     pendingApplications,
+    pendingTransactions,
   });
 });
 

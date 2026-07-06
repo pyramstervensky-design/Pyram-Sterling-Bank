@@ -15,4 +15,5 @@ export interface AdminStats {
   totalLoansIssued: number;
   totalPartnersApproved: number;
   pendingApplications: number;
+  pendingTransactions: number;
 }

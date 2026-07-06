@@ -5,9 +5,13 @@
  * Pyram Sterling Bank API
  * OpenAPI spec version: 0.1.0
  */
+import type { AdminListTransactionsStatus } from './adminListTransactionsStatus';
+import type { AdminListTransactionsType } from './adminListTransactionsType';
 
 export type AdminListTransactionsParams = {
 limit?: number;
 offset?: number;
 userId?: string;
+status?: AdminListTransactionsStatus;
+type?: AdminListTransactionsType;
 };

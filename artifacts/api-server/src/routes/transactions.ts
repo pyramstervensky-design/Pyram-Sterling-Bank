@@ -2,6 +2,7 @@ import { Router, type Request } from "express";
 import { db, usersTable, kaneTable, transactionsTable, notificationsTable } from "@workspace/db";
 import { eq, desc, and } from "drizzle-orm";
 import { requireAuth } from "../lib/auth";
+import { notifyAdmins } from "../lib/notify";
 
 const router = Router();
 
@@ -91,13 +92,6 @@ router.post("/deposit", requireAuth, async (req, res) => {
     return;
   }
 
-  const newBalance = parseFloat(kane.balance) + amount;
-
-  await db
-    .update(kaneTable)
-    .set({ balance: String(newBalance.toFixed(2)) })
-    .where(eq(kaneTable.userId, user.id));
-
   const [tx] = await db
     .insert(transactionsTable)
     .values({
@@ -105,16 +99,22 @@ router.post("/deposit", requireAuth, async (req, res) => {
       type: "deposit",
       amount: String(amount.toFixed(2)),
       description: description ?? "Depo",
-      status: "completed",
+      status: "pending",
     })
     .returning();
 
   await db.insert(notificationsTable).values({
     userId: user.id,
-    title: "Depo reyisi",
-    message: `Ou depoze G ${fmtAmount(amount)} nan kont ou. Nouvo balans: G ${fmtAmount(newBalance)}.`,
-    type: "success",
+    title: "Demann depo soumèt",
+    message: `Demann depo ou a nan valè G ${fmtAmount(amount)} ap tann apwobasyon admin.`,
+    type: "info",
     isRead: false,
+  });
+
+  await notifyAdmins({
+    title: "Nouvo demann depo",
+    message: `${`${user.firstName} ${user.lastName}`.trim() || user.email} mande yon depo G ${fmtAmount(amount)}.`,
+    type: "info",
   });
 
   res.status(201).json(formatTx(tx));
@@ -141,13 +141,6 @@ router.post("/withdraw", requireAuth, async (req, res) => {
     return;
   }
 
-  const newBalance = currentBalance - amount;
-
-  await db
-    .update(kaneTable)
-    .set({ balance: String(newBalance.toFixed(2)) })
-    .where(eq(kaneTable.userId, user.id));
-
   const [tx] = await db
     .insert(transactionsTable)
     .values({
@@ -155,16 +148,22 @@ router.post("/withdraw", requireAuth, async (req, res) => {
       type: "withdrawal",
       amount: String(amount.toFixed(2)),
       description: description ?? "Retrè",
-      status: "completed",
+      status: "pending",
     })
     .returning();
 
   await db.insert(notificationsTable).values({
     userId: user.id,
-    title: "Retrè reyisi",
-    message: `Ou retire G ${fmtAmount(amount)} nan kont ou. Nouvo balans: G ${fmtAmount(newBalance)}.`,
+    title: "Demann retrè soumèt",
+    message: `Demann retrè ou a nan valè G ${fmtAmount(amount)} ap tann apwobasyon admin.`,
     type: "info",
     isRead: false,
+  });
+
+  await notifyAdmins({
+    title: "Nouvo demann retrè",
+    message: `${`${user.firstName} ${user.lastName}`.trim() || user.email} mande yon retrè G ${fmtAmount(amount)}.`,
+    type: "info",
   });
 
   res.status(201).json(formatTx(tx));
@@ -223,19 +222,6 @@ router.post("/transfer", requireAuth, async (req, res) => {
     .from(usersTable)
     .where(eq(usersTable.id, recipientKane.userId));
 
-  const senderNewBalance = currentBalance - amount;
-  const recipientNewBalance = parseFloat(recipientKane.balance) + amount;
-
-  await db
-    .update(kaneTable)
-    .set({ balance: String(senderNewBalance.toFixed(2)) })
-    .where(eq(kaneTable.userId, user.id));
-
-  await db
-    .update(kaneTable)
-    .set({ balance: String(recipientNewBalance.toFixed(2)) })
-    .where(eq(kaneTable.userId, recipientKane.userId));
-
   const recipientFullName = recipientUser
     ? `${recipientUser.firstName} ${recipientUser.lastName}`.trim()
     : recipientAccount;
@@ -249,37 +235,25 @@ router.post("/transfer", requireAuth, async (req, res) => {
       type: "transfer",
       amount: String(amount.toFixed(2)),
       description: description ?? `Transfè bay ${recipientFullName}`,
-      status: "completed",
+      status: "pending",
       recipientAccount,
       recipientName: recipientFullName,
       senderAccount: senderKane.accountNumber,
     })
     .returning();
 
-  await db.insert(transactionsTable).values({
-    userId: recipientKane.userId,
-    type: "deposit",
-    amount: String(amount.toFixed(2)),
-    description: description ?? `Transfè soti nan ${senderFullName || senderKane.accountNumber}`,
-    status: "completed",
-    senderAccount: senderKane.accountNumber,
-    recipientAccount,
-  });
-
   await db.insert(notificationsTable).values({
     userId: user.id,
-    title: "Transfè reyisi",
-    message: `Ou voye G ${fmtAmount(amount)} bay ${recipientFullName} (${recipientAccount}). Nouvo balans: G ${fmtAmount(senderNewBalance)}.`,
-    type: "success",
+    title: "Demann transfè soumèt",
+    message: `Demann transfè ou a nan valè G ${fmtAmount(amount)} bay ${recipientFullName} (${recipientAccount}) ap tann apwobasyon admin.`,
+    type: "info",
     isRead: false,
   });
 
-  await db.insert(notificationsTable).values({
-    userId: recipientKane.userId,
-    title: "Ou resevwa lajan",
-    message: `Ou resevwa G ${fmtAmount(amount)} soti nan ${senderFullName || senderKane.accountNumber}. Nouvo balans: G ${fmtAmount(recipientNewBalance)}.`,
-    type: "success",
-    isRead: false,
+  await notifyAdmins({
+    title: "Nouvo demann transfè",
+    message: `${senderFullName || senderKane.accountNumber} mande yon transfè G ${fmtAmount(amount)} bay ${recipientFullName} (${recipientAccount}).`,
+    type: "info",
   });
 
   res.status(201).json(formatTx(tx));

@@ -2,6 +2,7 @@ import { Router, type Request } from "express";
 import { db, usersTable, kaneTable, partnersTable, transactionsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { requireAuth } from "../lib/auth";
+import { notifyAdmins } from "../lib/notify";
 
 const router = Router();
 
@@ -89,6 +90,12 @@ router.post("/", requireAuth, async (req, res) => {
       onboardingFee: "50.00",
     })
     .returning();
+
+  await notifyAdmins({
+    title: "Nouvo aplikasyon patnè",
+    message: `${businessName} (${businessType}) soumèt yon aplikasyon patnè.`,
+    type: "info",
+  });
 
   res.status(201).json(formatPartner(partner));
 });

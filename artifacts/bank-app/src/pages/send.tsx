@@ -27,7 +27,7 @@ export default function SendPage() {
       { data: { amount: Number(amount), recipientAccount: recipient, description } },
       {
         onSuccess: () => {
-          toast({ title: "Transfè Reyisi", description: `Voye G ${amount} bay ${recipient}` });
+          toast({ title: "Demann transfè soumèt", description: `Demann transfè G ${amount} bay ${recipient} ap tann apwobasyon admin.` });
           setAmount("");
           setRecipient("");
           setDescription("");

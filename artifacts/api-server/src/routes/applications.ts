@@ -2,6 +2,7 @@ import { Router, type Request } from "express";
 import { db, usersTable, kaneTable, notificationsTable, accountApplicationsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { requireAuth, generateAccountNumber, generateCardNumber, generateCardExpiry, generateCvv } from "../lib/auth";
+import { notifyAdmins } from "../lib/notify";
 
 const router = Router();
 
@@ -84,6 +85,12 @@ router.post("/", requireAuth, async (req, res) => {
     .insert(accountApplicationsTable)
     .values({ userId: user.id, firstName, lastName, phone, nationalId, appointmentDate, appointmentTime })
     .returning();
+
+  await notifyAdmins({
+    title: "Nouvo aplikasyon kont",
+    message: `${firstName} ${lastName} soumèt yon aplikasyon pou ouvèti kont (randevou ${appointmentDate} a ${appointmentTime}).`,
+    type: "info",
+  });
 
   res.status(201).json(formatApplication(app));
 });

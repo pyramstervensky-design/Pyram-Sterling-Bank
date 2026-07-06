@@ -30,7 +30,7 @@ export default function DepositPage() {
       { data: { amount: num, description: description || undefined } },
       {
         onSuccess: () => {
-          toast({ title: "Depo reyisi", description: `G ${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2 })} depoze avèk siksè.` });
+          toast({ title: "Demann depo soumèt", description: `Demann depo G ${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2 })} ap tann apwobasyon admin.` });
           setAmount("");
           setDescription("");
           queryClient.invalidateQueries({ queryKey: getGetKaneQueryKey() });

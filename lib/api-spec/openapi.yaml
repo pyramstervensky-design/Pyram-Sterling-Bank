@@ -372,6 +372,16 @@ paths:
           in: query
           schema:
             type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, completed, failed]
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [deposit, withdrawal, transfer, loan_disbursement, loan_repayment, partner_payment]
       responses:
         "200":
           description: All transactions
@@ -381,6 +391,44 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Transaction"
+
+  /admin/transactions/{transactionId}/approve:
+    post:
+      operationId: adminApproveTransaction
+      tags: [admin]
+      summary: Admin — approve a pending transaction (deposit/withdrawal/transfer)
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Transaction approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /admin/transactions/{transactionId}/reject:
+    post:
+      operationId: adminRejectTransaction
+      tags: [admin]
+      summary: Admin — reject a pending transaction (deposit/withdrawal/transfer)
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Transaction rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
 
   /admin/loans:
     get:
@@ -891,7 +939,7 @@ components:
 
     AdminStats:
       type: object
-      required: [totalUsers, totalBalance, totalTransactions, pendingLoans, activeLoans, totalLoansIssued, totalPartnersApproved, pendingApplications]
+      required: [totalUsers, totalBalance, totalTransactions, pendingLoans, activeLoans, totalLoansIssued, totalPartnersApproved, pendingApplications, pendingTransactions]
       properties:
         totalUsers:             { type: integer }
         totalBalance:           { type: number }
@@ -901,6 +949,7 @@ components:
         totalLoansIssued:       { type: number }
         totalPartnersApproved:  { type: integer }
         pendingApplications:    { type: integer }
+        pendingTransactions:    { type: integer }
 
     CreditScoreUpdate:
       type: object

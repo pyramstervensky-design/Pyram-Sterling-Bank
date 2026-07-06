@@ -1500,6 +1500,146 @@ export function useAdminListTransactions<TData = Awaited<ReturnType<typeof admin
 
 
 
+export const getAdminApproveTransactionUrl = (transactionId: number,) => {
+
+
+
+
+  return `/api/admin/transactions/${transactionId}/approve`
+}
+
+/**
+ * @summary Admin — approve a pending transaction (deposit/withdrawal/transfer)
+ */
+export const adminApproveTransaction = async (transactionId: number, options?: RequestInit): Promise<Transaction> => {
+
+  return customFetch<Transaction>(getAdminApproveTransactionUrl(transactionId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getAdminApproveTransactionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminApproveTransaction>>, TError,{transactionId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminApproveTransaction>>, TError,{transactionId: number}, TContext> => {
+
+const mutationKey = ['adminApproveTransaction'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminApproveTransaction>>, {transactionId: number}> = (props) => {
+          const {transactionId} = props ?? {};
+
+          return  adminApproveTransaction(transactionId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminApproveTransactionMutationResult = NonNullable<Awaited<ReturnType<typeof adminApproveTransaction>>>
+
+    export type AdminApproveTransactionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Admin — approve a pending transaction (deposit/withdrawal/transfer)
+ */
+export const useAdminApproveTransaction = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminApproveTransaction>>, TError,{transactionId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminApproveTransaction>>,
+        TError,
+        {transactionId: number},
+        TContext
+      > => {
+      return useMutation(getAdminApproveTransactionMutationOptions(options));
+    }
+
+export const getAdminRejectTransactionUrl = (transactionId: number,) => {
+
+
+
+
+  return `/api/admin/transactions/${transactionId}/reject`
+}
+
+/**
+ * @summary Admin — reject a pending transaction (deposit/withdrawal/transfer)
+ */
+export const adminRejectTransaction = async (transactionId: number, options?: RequestInit): Promise<Transaction> => {
+
+  return customFetch<Transaction>(getAdminRejectTransactionUrl(transactionId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getAdminRejectTransactionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRejectTransaction>>, TError,{transactionId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminRejectTransaction>>, TError,{transactionId: number}, TContext> => {
+
+const mutationKey = ['adminRejectTransaction'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminRejectTransaction>>, {transactionId: number}> = (props) => {
+          const {transactionId} = props ?? {};
+
+          return  adminRejectTransaction(transactionId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminRejectTransactionMutationResult = NonNullable<Awaited<ReturnType<typeof adminRejectTransaction>>>
+
+    export type AdminRejectTransactionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Admin — reject a pending transaction (deposit/withdrawal/transfer)
+ */
+export const useAdminRejectTransaction = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRejectTransaction>>, TError,{transactionId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminRejectTransaction>>,
+        TError,
+        {transactionId: number},
+        TContext
+      > => {
+      return useMutation(getAdminRejectTransactionMutationOptions(options));
+    }
+
 export const getAdminListLoansUrl = (params?: AdminListLoansParams,) => {
   const normalizedParams = new URLSearchParams();
 

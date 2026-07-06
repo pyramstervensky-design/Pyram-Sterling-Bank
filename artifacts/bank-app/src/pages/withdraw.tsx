@@ -33,7 +33,7 @@ export default function WithdrawPage() {
       { data: { amount: numAmount, description: description || undefined } },
       {
         onSuccess: () => {
-          toast({ title: "Retrè reyisi", description: `G ${numAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })} retire avèk siksè.` });
+          toast({ title: "Demann retrè soumèt", description: `Demann retrè G ${numAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })} ap tann apwobasyon admin.` });
           setAmount("");
           setDescription("");
           queryClient.invalidateQueries({ queryKey: getGetKaneQueryKey() });

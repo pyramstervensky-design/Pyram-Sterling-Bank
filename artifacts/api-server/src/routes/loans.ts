@@ -2,6 +2,7 @@ import { Router, type Request } from "express";
 import { db, usersTable, kaneTable, loansTable, transactionsTable, creditScoreHistoryTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { requireAuth } from "../lib/auth";
+import { notifyAdmins } from "../lib/notify";
 
 const router = Router();
 
@@ -72,6 +73,12 @@ router.post("/", requireAuth, async (req, res) => {
       amountRepaid: "0.00",
     })
     .returning();
+
+  await notifyAdmins({
+    title: "Nouvo demann prè",
+    message: `${user.firstName} ${user.lastName} mande yon prè G ${amount.toFixed(2)} — ${purpose}.`,
+    type: "info",
+  });
 
   res.status(201).json(formatLoan(loan));
 });

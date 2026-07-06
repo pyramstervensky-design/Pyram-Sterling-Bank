@@ -235,6 +235,7 @@ export interface AdminStats {
   totalLoansIssued: number;
   totalPartnersApproved: number;
   pendingApplications: number;
+  pendingTransactions: number;
 }
 
 export interface CreditScoreUpdate {
@@ -339,7 +340,30 @@ export type AdminListTransactionsParams = {
 limit?: number;
 offset?: number;
 userId?: string;
+status?: AdminListTransactionsStatus;
+type?: AdminListTransactionsType;
 };
+
+export type AdminListTransactionsStatus = typeof AdminListTransactionsStatus[keyof typeof AdminListTransactionsStatus];
+
+
+export const AdminListTransactionsStatus = {
+  pending: 'pending',
+  completed: 'completed',
+  failed: 'failed',
+} as const;
+
+export type AdminListTransactionsType = typeof AdminListTransactionsType[keyof typeof AdminListTransactionsType];
+
+
+export const AdminListTransactionsType = {
+  deposit: 'deposit',
+  withdrawal: 'withdrawal',
+  transfer: 'transfer',
+  loan_disbursement: 'loan_disbursement',
+  loan_repayment: 'loan_repayment',
+  partner_payment: 'partner_payment',
+} as const;
 
 export type AdminListLoansParams = {
 status?: AdminListLoansStatus;
