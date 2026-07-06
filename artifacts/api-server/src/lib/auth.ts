@@ -93,16 +93,38 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       ? (isAllowlistedAdmin(email) ? "admin" : "user")
       : (isFirstUser ? "admin" : "user");
 
-    const [newUser] = await db
-      .insert(usersTable)
-      .values({ clerkId: userId, email, firstName, lastName, role })
-      .returning();
-    user = newUser;
+    // First login is frequently concurrent: the SPA fires /api/users/me,
+    // /api/kane, /api/notifications, etc. at once, so several requests reach
+    // this branch before any row exists and race to INSERT the same user.
+    // Without recovery the losers throw a UNIQUE violation and 500 (observed
+    // in production). `users` has TWO unique constraints (clerk_id AND email),
+    // so `ON CONFLICT (clerk_id)` alone is insufficient — a concurrent insert
+    // can still collide on the email index. Instead: try the insert, and if it
+    // fails because the race winner already created the row, re-select that row
+    // by clerkId and continue. Only rethrow if no matching row exists (a
+    // genuine error, e.g. a different user already owns this email).
+    let insertedNewUser = false;
+    try {
+      const [newUser] = await db
+        .insert(usersTable)
+        .values({ clerkId: userId, email, firstName, lastName, role })
+        .returning();
+      user = newUser;
+      insertedNewUser = true;
+    } catch (insertErr) {
+      [user] = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.clerkId, userId));
+      if (!user) throw insertErr;
+    }
 
     // Admin (first user) gets Kanè immediately. Regular users apply first.
     // Guarded on role so that under an active allowlist a non-admin first
-    // registrant does NOT receive an unearned Kanè.
-    if (isFirstUser && role === "admin") {
+    // registrant does NOT receive an unearned Kanè. Guarded on insertedNewUser
+    // so only the request that actually created the row provisions the Kanè —
+    // race losers that re-selected the row must not create a duplicate.
+    if (insertedNewUser && isFirstUser && role === "admin") {
       const accountNumber = generateAccountNumber();
       const cardNumber = generateCardNumber();
       await db.insert(kaneTable).values({
