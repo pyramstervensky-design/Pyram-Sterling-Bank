@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "K5fzI7tTg3r1b1UMqPWNM"
+uri = "file://.local/pyram-admin-dashboard.png"
+type = "image"
+title = "Admin dashboard (signed in as pyramstervensky@gmail.com) in dev preview"
