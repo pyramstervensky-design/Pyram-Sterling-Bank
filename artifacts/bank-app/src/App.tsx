@@ -1,6 +1,6 @@
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { useEffect, useRef } from "react";
-import { ClerkProvider, SignIn, SignUp, Show, useClerk } from '@clerk/react';
+import { ClerkProvider, SignIn, SignUp, Show, useClerk, useAuth } from '@clerk/react';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
@@ -143,6 +143,41 @@ function AdminRoute({ component: Component }: { component: any }) {
   );
 }
 
+function ClerkSessionRecovery() {
+  const { signOut } = useClerk();
+  const { isSignedIn } = useAuth();
+  const queryClient = useQueryClient();
+  const recoveringRef = useRef(false);
+  const signedInRef = useRef(isSignedIn);
+  signedInRef.current = isSignedIn;
+
+  useEffect(() => {
+    const cache = queryClient.getQueryCache();
+    const unsubscribe = cache.subscribe(() => {
+      if (recoveringRef.current) return;
+      // Only recover when Clerk itself believes the user is signed in. If Clerk
+      // already knows we're signed out, a 401 is expected and needs no action.
+      if (!signedInRef.current) return;
+      const has401 = cache.getAll().some((q) => {
+        const err = q.state.error as { status?: number } | null;
+        return err != null && err.status === 401;
+      });
+      if (!has401) return;
+      // A 401 means Clerk's client optimistically believes it is signed in (it
+      // trusts the __client_uat cookie) but the __session token sent to the API
+      // is invalid or stale — e.g. leftover cookies from a previous Clerk
+      // instance on this domain. Retrying is futile, so clear the broken session
+      // and return the user to a clean state where they can sign in again,
+      // instead of trapping them on the "couldn't load your account" screen.
+      recoveringRef.current = true;
+      void signOut({ redirectUrl: basePath || "/" });
+    });
+    return unsubscribe;
+  }, [queryClient, signOut]);
+
+  return null;
+}
+
 function ClerkQueryClientCacheInvalidator() {
   const { addListener } = useClerk();
   const queryClient = useQueryClient();
@@ -180,6 +215,7 @@ function ClerkProviderWithRoutes() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <ClerkQueryClientCacheInvalidator />
+          <ClerkSessionRecovery />
           <Switch>
             <Route path="/" component={HomeRedirect} />
             <Route path="/sign-in/*?" component={SignInPage} />

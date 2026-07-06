@@ -6,3 +6,4 @@
 - [Responsive shell & nav drawer](responsive-layout.md) — mobile "messy layout" is usually the fixed sidebar; shell = persistent lg sidebar + mobile drawer sharing one SidebarContent; drawer needs full a11y contract.
 - [Verifying Clerk-gated admin UI](clerk-admin-verification.md) — use runTest({testClerkAuth:true}) + a [Clerk Auth] step to sign in as any admin and screenshot gated pages; no user password needed.
 - [First-login provisioning race](first-login-provisioning-race.md) — SPA fires concurrent authed calls; multi-unique-constraint insert needs try+re-select, not onConflict(single target).
+- [Clerk stale-session 401 on web](clerk-stale-session-401.md) — every authed call 401s in preview but fresh context works = stale/duplicate Clerk cookies; fix is client signOut-on-401 recovery, NOT server/token changes.
