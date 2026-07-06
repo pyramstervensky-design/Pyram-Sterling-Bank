@@ -112,10 +112,52 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       user = newUser;
       insertedNewUser = true;
     } catch (insertErr) {
+      // The insert failed on a UNIQUE constraint. Two distinct causes:
+      // 1) First-login race: a concurrent request already created THIS user's row
+      //    under the same clerkId. Re-select by clerkId and continue.
       [user] = await db
         .select()
         .from(usersTable)
         .where(eq(usersTable.clerkId, userId));
+      // 2) The email is already owned by a row with a DIFFERENT clerkId. This
+      //    happens when the account row was provisioned under another Clerk user
+      //    id — e.g. a row seeded from the dev Clerk instance into production, or
+      //    the user's Clerk id otherwise changed. Clerk guarantees a verified
+      //    email maps to exactly one user per instance, so it is safe to RE-LINK
+      //    that existing row to the current Clerk user id rather than throwing a
+      //    500. This keeps the (admin) account reachable across Clerk instances.
+      if (!user) {
+        const [byEmail] = await db
+          .select()
+          .from(usersTable)
+          .where(eq(usersTable.email, email));
+        if (byEmail) {
+          const relinkUpdates: Record<string, unknown> = { clerkId: userId };
+          if (firstName && firstName !== byEmail.firstName)
+            relinkUpdates.firstName = firstName;
+          if (lastName && lastName !== byEmail.lastName)
+            relinkUpdates.lastName = lastName;
+          // Keep the allowlist authoritative for the re-linked account too.
+          if (getAdminAllowlist().length > 0) {
+            relinkUpdates.role = isAllowlistedAdmin(email) ? "admin" : "user";
+          }
+          await db
+            .update(usersTable)
+            .set(relinkUpdates)
+            .where(eq(usersTable.id, byEmail.id));
+          req.log?.info(
+            {
+              userRowId: byEmail.id,
+              oldClerkId: byEmail.clerkId,
+              newClerkId: userId,
+              roleAfter: relinkUpdates.role ?? byEmail.role,
+            },
+            "Re-linked existing account to current Clerk user id"
+          );
+          Object.assign(byEmail, relinkUpdates);
+          user = byEmail;
+        }
+      }
       if (!user) throw insertErr;
     }
 
